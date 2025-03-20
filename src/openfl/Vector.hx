@@ -704,12 +704,17 @@ abstract Vector<T>(IVector<T>)
 
 	@:noCompletion private inline function get_length():Int
 	{
-		return this.length;
+		return this.get_length();
 	}
 
 	@:noCompletion private inline function set_length(value:Int):Int
 	{
-		return this.length = value;
+		return this.set_length(value);
+	}
+
+	@:noCompletition public inline function unsafe_getArray():Array<Dynamic>
+	{
+		return this.unsafe_getArray();
 	}
 }
 
@@ -927,7 +932,7 @@ abstract Vector<T>(IVector<T>)
 	}
 
 	// Getters & Setters
-	@:noCompletion private function get_length():Int
+	@:noCompletion private inline function get_length():Int
 	{
 		return __array.length;
 	}
@@ -961,6 +966,11 @@ abstract Vector<T>(IVector<T>)
 		}
 
 		return __array.length;
+	}
+
+	@:noCompletition public inline function unsafe_getArray():Array<Bool>
+	{
+		return __array;
 	}
 }
 
@@ -1180,7 +1190,7 @@ abstract Vector<T>(IVector<T>)
 	}
 
 	// Getters & Setters
-	@:noCompletion private function get_length():Int
+	@:noCompletion private inline function get_length():Int
 	{
 		return __array.length;
 	}
@@ -1222,6 +1232,11 @@ abstract Vector<T>(IVector<T>)
 		}
 
 		return __array.length;
+	}
+
+	@:noCompletition public inline function unsafe_getArray():Array<Float>
+	{
+		return __array;
 	}
 }
 
@@ -1439,7 +1454,7 @@ abstract Vector<T>(IVector<T>)
 	}
 
 	// Getters & Setters
-	@:noCompletion private function get_length():Int
+	@:noCompletion private inline function get_length():Int
 	{
 		return __array.length;
 	}
@@ -1474,6 +1489,11 @@ abstract Vector<T>(IVector<T>)
 		}
 
 		return __array.length;
+	}
+
+	@:noCompletition public inline function unsafe_getArray():Array<Function>
+	{
+		return __array;
 	}
 }
 #end
@@ -1684,7 +1704,7 @@ abstract Vector<T>(IVector<T>)
 	}
 
 	// Getters & Setters
-	@:noCompletion private function get_length():Int
+	@:noCompletion private inline function get_length():Int
 	{
 		return __array.length;
 	}
@@ -1720,6 +1740,11 @@ abstract Vector<T>(IVector<T>)
 		}
 
 		return __array.length;
+	}
+
+	@:noCompletition public inline function unsafe_getArray():Array<Int>
+	{
+		return __array;
 	}
 }
 
@@ -1940,7 +1965,7 @@ abstract Vector<T>(IVector<T>)
 	}
 
 	// Getters & Setters
-	@:noCompletion private function get_length():Int
+	@:noCompletion private inline function get_length():Int
 	{
 		return __array.length;
 	}
@@ -1977,6 +2002,11 @@ abstract Vector<T>(IVector<T>)
 
 		return __array.length;
 	}
+
+	@:noCompletition public inline function unsafe_getArray():Array<T>
+	{
+		return __array;
+	}
 }
 #end
 
@@ -2006,6 +2036,8 @@ abstract Vector<T>(IVector<T>)
 	public function splice(pos:Int, len:Int):IVector<T>;
 	public function toString():String;
 	public function unshift(value:T):Void;
+
+	@:noCompletition public function unsafe_getArray():Array<T>;
 
 	@:noCompletion private var __tempIndex:Int;
 }
@@ -2227,6 +2259,11 @@ abstract Vector<T>(VectorData<T>) from VectorData<T>
 	{
 		return this.length = value;
 	}
+
+	@:noCompletition public inline function unsafe_getArray():Array<Bool>
+	{
+		return __array;
+	}
 }
 
 @SuppressWarnings("checkstyle:FieldDocComment")
@@ -2262,6 +2299,7 @@ abstract Vector<T>(VectorData<T>) from VectorData<T>
 			unshift: { value: p.unshift },
 			get_length: { value: p.get_length },
 			set_length: { value: p.set_length },
+			unsafe_getArray: { value: p.unsafe_getArray },
 		}
 		var _VectorData = function (length, fixed, array) {
 			if (array == null) array = [];
@@ -2486,6 +2524,11 @@ abstract Vector<T>(VectorData<T>) from VectorData<T>
 		}
 
 		return value;
+	}
+
+	@:noCompletition public inline function unsafe_getArray():Array<Dynamic>
+	{
+		return untyped #if haxe4 js.Syntax.code #else __js__ #end ("this");
 	}
 }
 
@@ -2761,6 +2804,11 @@ abstract Vector<T>(VectorData<T>)
 	@:noCompletion private inline function set_length(value:Int):Int
 	{
 		return this.length = value;
+	}
+
+	@:noCompletition public inline function unsafe_getArray():Array<T>
+	{
+		return __array;
 	}
 }
 
