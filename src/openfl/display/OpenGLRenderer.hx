@@ -1006,8 +1006,10 @@ class OpenGLRenderer extends DisplayObjectRenderer
 
 	@:noCompletion private override function __setBlendMode(value:BlendMode):Void
 	{
-		if (__overrideBlendMode != null) value = __overrideBlendMode;
-		if (__blendMode == value) return;
+		if (__overrideBlendMode != null)
+			value = __overrideBlendMode;
+		if (__blendMode == value)
+			return;
 
 		__blendMode = value;
 
@@ -1016,25 +1018,55 @@ class OpenGLRenderer extends DisplayObjectRenderer
 			case ADD:
 				__context3D.setBlendFactors(ONE, ONE);
 
+			case ALPHA:
+				__context3D.setBlendFactors(SOURCE_ALPHA, ONE_MINUS_SOURCE_ALPHA);
+
+			case DARKEN:
+				if (__gl.getExtension("EXT_blend_minmax") != null)
+				{
+					__context3D.setBlendFactors(ONE, ONE);
+					__context3D.__setGLBlendEquation(0x8007); // GL_MIN
+				}
+				else
+				{
+					// Utilize the effect of multiplying to achieve a blending of approximations for darkening.
+					__context3D.setBlendFactors(DESTINATION_COLOR, ONE_MINUS_SOURCE_ALPHA);
+				}
+
+			case ERASE:
+				__context3D.setBlendFactors(ZERO, ONE_MINUS_SOURCE_ALPHA);
+
+			case HARDLIGHT, OVERLAY:
+				// These patterns require more complex calculations and revert to the normal mixture.
+				__context3D.setBlendFactors(ONE, ONE_MINUS_SOURCE_ALPHA);
+
+			case INVERT:
+				__context3D.setBlendFactors(ONE_MINUS_DESTINATION_COLOR, ZERO);
+
+			case LIGHTEN:
+				if (__gl.getExtension("EXT_blend_minmax") != null)
+				{
+					__context3D.setBlendFactors(ONE, ONE);
+					__context3D.__setGLBlendEquation(0x8008); // GL_MAX
+				}
+				else
+				{
+					// Backward implementation: Utilizing additive blending for approximate brightening effect
+					__context3D.setBlendFactors(ONE, ONE);
+				}
+
 			case MULTIPLY:
 				__context3D.setBlendFactors(DESTINATION_COLOR, ONE_MINUS_SOURCE_ALPHA);
+
+			case NORMAL:
+				__context3D.setBlendFactors(ONE, ONE_MINUS_SOURCE_ALPHA);
 
 			case SCREEN:
 				__context3D.setBlendFactors(ONE, ONE_MINUS_SOURCE_COLOR);
 
-			case SUBTRACT:
+			case SUBTRACT, DIFFERENCE:
 				__context3D.setBlendFactors(ONE, ONE);
 				__context3D.__setGLBlendEquation(__gl.FUNC_REVERSE_SUBTRACT);
-
-			#if desktop
-			case DARKEN:
-				__context3D.setBlendFactors(ONE, ONE);
-				__context3D.__setGLBlendEquation(0x8007); // GL_MIN
-
-			case LIGHTEN:
-				__context3D.setBlendFactors(ONE, ONE);
-				__context3D.__setGLBlendEquation(0x8008); // GL_MAX
-			#end
 
 			default:
 				__context3D.setBlendFactors(ONE, ONE_MINUS_SOURCE_ALPHA);
