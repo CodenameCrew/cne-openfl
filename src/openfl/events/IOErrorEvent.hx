@@ -33,7 +33,7 @@ class IOErrorEvent extends ErrorEvent
 		| `target` | The network object experiencing the input/output error. |
 		| `text` | Text to be displayed as an error message. |
 	**/
-	public static inline var IO_ERROR:EventType<IOErrorEvent> = "ioError";
+	public static var IO_ERROR(default, never):EventType<IOErrorEvent> = "ioError";
 
 	#if (haxe4 && sys)
 	/**
@@ -52,7 +52,7 @@ class IOErrorEvent extends ErrorEvent
 		| `target` | The object on which the error occurred. |
 		| `text` | Text to be displayed as an error message. |
 	**/
-	public static inline var STANDARD_OUTPUT_IO_ERROR:EventType<IOErrorEvent> = "standardOutputIoError";
+	public static var STANDARD_OUTPUT_IO_ERROR(default, never):EventType<IOErrorEvent> = "standardOutputIoError";
 
 	/**
 		The `standardErrorIoError` event is dispatched when an error occurs
@@ -70,7 +70,7 @@ class IOErrorEvent extends ErrorEvent
 		| `target` | The object on which the error occurred. |
 		| `text` | Text to be displayed as an error message. |
 	**/
-	public static inline var STANDARD_ERROR_IO_ERROR:EventType<IOErrorEvent> = "standardErrorIoError";
+	public static var STANDARD_ERROR_IO_ERROR(default, never):EventType<IOErrorEvent> = "standardErrorIoError";
 	#end
 
 	// @:noCompletion @:dox(hide) public static var NETWORK_ERROR:String;

@@ -9,7 +9,7 @@ import openfl.events.Event;
  */
 class SQLErrorEvent extends ErrorEvent
 {
-	public static inline var ERROR:EventType<SQLErrorEvent> = "error";
+	public static var ERROR(default, never):EventType<SQLErrorEvent> = "error";
 
 	public var error(default, null):SQLError;
 

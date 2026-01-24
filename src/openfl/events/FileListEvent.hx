@@ -19,13 +19,13 @@ class FileListEvent extends Event
 		The `FileListEvent.DIRECTORY_LISTING` constant defines the value of the
 		`type` property of the event object for a `directoryListing` event.
 	**/
-	public static inline var DIRECTORY_LISTING:EventType<FileListEvent> = "directoryListing";
+	public static var DIRECTORY_LISTING(default, never):EventType<FileListEvent> = "directoryListing";
 
 	/**
 		The `FileListEvent.SELECT_MULTIPLE` constant defines the value of the
 		`type` property of the event object for a `selectMultiple` event.
 	**/
-	public static inline var SELECT_MULTIPLE:EventType<FileListEvent> = "selectMultiple";
+	public static var SELECT_MULTIPLE(default, never):EventType<FileListEvent> = "selectMultiple";
 
 	/**
 		An array of File objects representing the files and directories found or

@@ -27,7 +27,7 @@ class ActivityEvent extends Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The object beginning or ending a session, such as a Camera or Microphone object. |
 	**/
-	public static inline var ACTIVITY:EventType<ActivityEvent> = "activity";
+	public static var ACTIVITY(default, never):EventType<ActivityEvent> = "activity";
 
 	/**
 		Indicates whether the device is activating (`true`) or deactivating

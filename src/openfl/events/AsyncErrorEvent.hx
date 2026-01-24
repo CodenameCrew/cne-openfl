@@ -28,7 +28,7 @@ class AsyncErrorEvent extends ErrorEvent
 		| `target` | The object dispatching the event. |
 		| `error` | The error that triggered the event. |
 	**/
-	public static inline var ASYNC_ERROR:EventType<AsyncErrorEvent> = "asyncError";
+	public static var ASYNC_ERROR(default, never):EventType<AsyncErrorEvent> = "asyncError";
 
 	/**
 		The exception that was thrown.

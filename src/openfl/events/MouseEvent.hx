@@ -48,7 +48,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var CLICK:EventType<MouseEvent> = "click";
+	public static var CLICK(default, never):EventType<MouseEvent> = "click";
 
 	#if false
 	/**
@@ -100,7 +100,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var DOUBLE_CLICK:EventType<MouseEvent> = "doubleClick";
+	public static var DOUBLE_CLICK(default, never):EventType<MouseEvent> = "doubleClick";
 
 	/**
 		Defines the value of the `type` property of a `middleClick` event
@@ -124,7 +124,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var MIDDLE_CLICK:EventType<MouseEvent> = "middleClick";
+	public static var MIDDLE_CLICK(default, never):EventType<MouseEvent> = "middleClick";
 
 	/**
 		Defines the value of the `type` property of a `middleMouseDown` event
@@ -149,7 +149,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var MIDDLE_MOUSE_DOWN:EventType<MouseEvent> = "middleMouseDown";
+	public static var MIDDLE_MOUSE_DOWN(default, never):EventType<MouseEvent> = "middleMouseDown";
 
 	/**
 		Defines the value of the `type` property of a `middleMouseUp` event
@@ -174,7 +174,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var MIDDLE_MOUSE_UP:EventType<MouseEvent> = "middleMouseUp";
+	public static var MIDDLE_MOUSE_UP(default, never):EventType<MouseEvent> = "middleMouseUp";
 
 	/**
 		Defines the value of the `type` property of a `mouseDown` event
@@ -199,7 +199,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var MOUSE_DOWN:EventType<MouseEvent> = "mouseDown";
+	public static var MOUSE_DOWN(default, never):EventType<MouseEvent> = "mouseDown";
 
 	/**
 		Defines the value of the `type` property of a `mouseMove` event
@@ -223,7 +223,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var MOUSE_MOVE:EventType<MouseEvent> = "mouseMove";
+	public static var MOUSE_MOVE(default, never):EventType<MouseEvent> = "mouseMove";
 
 	/**
 		Defines the value of the `type` property of a `mouseOut` event object.
@@ -248,7 +248,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var MOUSE_OUT:EventType<MouseEvent> = "mouseOut";
+	public static var MOUSE_OUT(default, never):EventType<MouseEvent> = "mouseOut";
 
 	/**
 		Defines the value of the `type` property of a `mouseOver` event
@@ -273,7 +273,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var MOUSE_OVER:EventType<MouseEvent> = "mouseOver";
+	public static var MOUSE_OVER(default, never):EventType<MouseEvent> = "mouseOver";
 
 	/**
 		Defines the value of the `type` property of a `mouseUp` event object.
@@ -297,7 +297,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var MOUSE_UP:EventType<MouseEvent> = "mouseUp";
+	public static var MOUSE_UP(default, never):EventType<MouseEvent> = "mouseUp";
 
 	/**
 		Defines the value of the `type` property of a `mouseWheel` event
@@ -322,7 +322,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var MOUSE_WHEEL:EventType<MouseEvent> = "mouseWheel";
+	public static var MOUSE_WHEEL(default, never):EventType<MouseEvent> = "mouseWheel";
 
 	/**
 		Defines the value of the `type` property of a
@@ -330,7 +330,7 @@ class MouseEvent extends Event
 
 		This event has the following properties:
 	**/
-	public static inline var RELEASE_OUTSIDE:EventType<MouseEvent> = "releaseOutside";
+	public static var RELEASE_OUTSIDE(default, never):EventType<MouseEvent> = "releaseOutside";
 
 	/**
 		Defines the value of the `type` property of a `rightClick` event
@@ -354,7 +354,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var RIGHT_CLICK:EventType<MouseEvent> = "rightClick";
+	public static var RIGHT_CLICK(default, never):EventType<MouseEvent> = "rightClick";
 
 	/**
 		Defines the value of the `type` property of a `rightMouseDown` event
@@ -379,7 +379,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var RIGHT_MOUSE_DOWN:EventType<MouseEvent> = "rightMouseDown";
+	public static var RIGHT_MOUSE_DOWN(default, never):EventType<MouseEvent> = "rightMouseDown";
 
 	/**
 		Defines the value of the `type` property of a `rightMouseUp` event
@@ -404,7 +404,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var RIGHT_MOUSE_UP:EventType<MouseEvent> = "rightMouseUp";
+	public static var RIGHT_MOUSE_UP(default, never):EventType<MouseEvent> = "rightMouseUp";
 
 	/**
 		Defines the value of the `type` property of a `rollOut` event object.
@@ -428,7 +428,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var ROLL_OUT:EventType<MouseEvent> = "rollOut";
+	public static var ROLL_OUT(default, never):EventType<MouseEvent> = "rollOut";
 
 	/**
 		Defines the value of the `type` property of a `rollOver` event object.
@@ -453,7 +453,7 @@ class MouseEvent extends Event
 		| `stageY` | The vertical coordinate at which the event occurred in global stage coordinates. |
 		| `target` | The InteractiveObject instance under the pointing device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var ROLL_OVER:EventType<MouseEvent> = "rollOver";
+	public static var ROLL_OVER(default, never):EventType<MouseEvent> = "rollOver";
 
 	/**
 		Indicates whether the Alt key is active (`true`) or inactive
@@ -724,6 +724,7 @@ class MouseEvent extends Event
 		shiftKey = false;
 		altKey = false;
 		ctrlKey = false;
+		bubbles = true;
 		relatedObject = null;
 		delta = 0;
 		localX = 0;

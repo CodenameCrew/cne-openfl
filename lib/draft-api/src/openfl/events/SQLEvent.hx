@@ -6,22 +6,22 @@ package openfl.events;
  */
 class SQLEvent extends Event
 {
-	public static inline var ANALYZE:EventType<SQLEvent> = "analyze";
-	public static inline var ATTACH:EventType<SQLEvent> = "attach";
-	public static inline var BEGIN:EventType<SQLEvent> = "begin";
-	public static inline var CANCEL:EventType<SQLEvent> = "cancel";
-	public static inline var CLOSE:EventType<SQLEvent> = "close";
-	public static inline var COMMIT:EventType<SQLEvent> = "commit";
-	public static inline var COMPACT:EventType<SQLEvent> = "compact";
-	public static inline var DEANALYZE:EventType<SQLEvent> = "deanalyze";
-	public static inline var DETACH:EventType<SQLEvent> = "detach";
-	public static inline var OPEN:EventType<SQLEvent> = "open";
-	public static inline var RELEASE_SAVEPOINT:EventType<SQLEvent> = "releaseSavepoint";
-	public static inline var RESULT:EventType<SQLEvent> = "result";
-	public static inline var ROLLBACK:EventType<SQLEvent> = "rollback";
-	public static inline var ROLLBACK_TO_SAVEPOINT:EventType<SQLEvent> = "rollbackToSavepoint";
-	public static inline var SCHEMA:EventType<SQLEvent> = "schema";
-	public static inline var SET_SAVEPOINT:EventType<SQLEvent> = "cancel";
+	public static var ANALYZE(default, never):EventType<SQLEvent> = "analyze";
+	public static var ATTACH(default, never):EventType<SQLEvent> = "attach";
+	public static var BEGIN(default, never):EventType<SQLEvent> = "begin";
+	public static var CANCEL(default, never):EventType<SQLEvent> = "cancel";
+	public static var CLOSE(default, never):EventType<SQLEvent> = "close";
+	public static var COMMIT(default, never):EventType<SQLEvent> = "commit";
+	public static var COMPACT(default, never):EventType<SQLEvent> = "compact";
+	public static var DEANALYZE(default, never):EventType<SQLEvent> = "deanalyze";
+	public static var DETACH(default, never):EventType<SQLEvent> = "detach";
+	public static var OPEN(default, never):EventType<SQLEvent> = "open";
+	public static var RELEASE_SAVEPOINT(default, never):EventType<SQLEvent> = "releaseSavepoint";
+	public static var RESULT(default, never):EventType<SQLEvent> = "result";
+	public static var ROLLBACK(default, never):EventType<SQLEvent> = "rollback";
+	public static var ROLLBACK_TO_SAVEPOINT(default, never):EventType<SQLEvent> = "rollbackToSavepoint";
+	public static var SCHEMA(default, never):EventType<SQLEvent> = "schema";
+	public static var SET_SAVEPOINT(default, never):EventType<SQLEvent> = "cancel";
 
 	public function new(type:EventType<SQLEvent>)
 	{

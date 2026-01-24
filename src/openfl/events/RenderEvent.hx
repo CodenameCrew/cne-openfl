@@ -42,7 +42,7 @@ import openfl.geom.Matrix;
 		| `renderer` | A reference to the active display object renderer. |
 		| `target` | The display object that is going to be rendered. |
 	**/
-	public static inline var CLEAR_DOM:EventType<RenderEvent> = "clearDOM";
+	public static var CLEAR_DOM(default, never):EventType<RenderEvent> = "clearDOM";
 
 	/**
 		The `RenderEvent.RENDER_CAIRO` constant defines the value of the `type` property
@@ -58,7 +58,7 @@ import openfl.geom.Matrix;
 		| `renderer` | A reference to the active display object renderer. |
 		| `target` | The display object that is going to be rendered. |
 	**/
-	public static inline var RENDER_CAIRO:EventType<RenderEvent> = "renderCairo";
+	public static var RENDER_CAIRO(default, never):EventType<RenderEvent> = "renderCairo";
 
 	/**
 		The `RenderEvent.RENDER_CANVAS` constant defines the value of the `type` property
@@ -74,7 +74,7 @@ import openfl.geom.Matrix;
 		| `renderer` | A reference to the active display object renderer. |
 		| `target` | The display object that is going to be rendered. |
 	**/
-	public static inline var RENDER_CANVAS:EventType<RenderEvent> = "renderCanvas";
+	public static var RENDER_CANVAS(default, never):EventType<RenderEvent> = "renderCanvas";
 
 	/**
 		The `RenderEvent.RENDER_DOM` constant defines the value of the `type` property
@@ -90,7 +90,7 @@ import openfl.geom.Matrix;
 		| `renderer` | A reference to the active display object renderer. |
 		| `target` | The display object that is going to be rendered. |
 	**/
-	public static inline var RENDER_DOM:EventType<RenderEvent> = "renderDOM";
+	public static var RENDER_DOM(default, never):EventType<RenderEvent> = "renderDOM";
 
 	/**
 		The `RenderEvent.RENDER_OPENGL` constant defines the value of the `type` property
@@ -106,7 +106,7 @@ import openfl.geom.Matrix;
 		| `renderer` | A reference to the active display object renderer. |
 		| `target` | The display object that is going to be rendered. |
 	**/
-	public static inline var RENDER_OPENGL:EventType<RenderEvent> = "renderOpenGL";
+	public static var RENDER_OPENGL(default, never):EventType<RenderEvent> = "renderOpenGL";
 
 	/**
 		Whether the current render should allow smoothing.

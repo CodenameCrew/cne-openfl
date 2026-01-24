@@ -28,7 +28,7 @@ class AccelerometerEvent extends Event
 		| `accelerationY` | The acceleration value in Gs (9.8m/sec/sec) along the y-axis. |
 		| `accelerationZ` | The acceleration value in Gs (9.8m/sec/sec) along the z-axis. |
 	**/
-	public static inline var UPDATE:EventType<AccelerometerEvent> = "update";
+	public static var UPDATE(default, never):EventType<AccelerometerEvent> = "update";
 
 	/**
 		Acceleration along the x-axis, measured in Gs.(1 G is roughly 9.8

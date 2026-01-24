@@ -22,7 +22,7 @@ class DNSResolverEvent extends Event
 	/**
 		Defines the value of the `type` property of a `lookup` event object.
 	**/
-	public static inline var LOOKUP:EventType<DNSResolverEvent> = "lookup";
+	public static var LOOKUP(default, never):EventType<DNSResolverEvent> = "lookup";
 
 	/**
 		The query string, such as a host name, IP address, or service locator
