@@ -45,7 +45,7 @@ class HTTPStatusEvent extends Event
 		| `status` | The HTTP status code returned by the server. |
 		| `target` | The network object receiving an HTTP status code. |
 	**/
-	public static inline var HTTP_RESPONSE_STATUS:EventType<HTTPStatusEvent> = "httpResponseStatus";
+	public static var HTTP_RESPONSE_STATUS(default, never):EventType<HTTPStatusEvent> = "httpResponseStatus";
 
 	/**
 		The `HTTPStatusEvent.HTTP_STATUS` constant defines the value of the
@@ -60,7 +60,7 @@ class HTTPStatusEvent extends Event
 		| `status` | The HTTP status code returned by the server. |
 		| `target` | The network object receiving an HTTP status code.  |
 	**/
-	public static inline var HTTP_STATUS:EventType<HTTPStatusEvent> = "httpStatus";
+	public static var HTTP_STATUS(default, never):EventType<HTTPStatusEvent> = "httpStatus";
 
 	/**
 		Indicates whether the request was redirected.

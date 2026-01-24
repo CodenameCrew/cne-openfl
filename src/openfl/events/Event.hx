@@ -72,7 +72,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | Any DisplayObject instance with a listener registered for the `activate` event. |
 	**/
-	public static inline var ACTIVATE:EventType<Event> = "activate";
+	public static var ACTIVATE(default, never):EventType<Event> = "activate";
 
 	/**
 		The `Event.ADDED` constant defines the value of the `type` property of
@@ -86,7 +86,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The DisplayObject instance being added to the display list. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var ADDED:EventType<Event> = "added";
+	public static var ADDED(default, never):EventType<Event> = "added";
 
 	/**
 		The `Event.ADDED_TO_STAGE` constant defines the value of the `type`
@@ -100,7 +100,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The DisplayObject instance being added to the on stage display list, either directly or through the addition of a sub tree in which the DisplayObject instance is contained. If the DisplayObject instance is being directly added, the `added` event occurs before this event. |
 	**/
-	public static inline var ADDED_TO_STAGE:EventType<Event> = "addedToStage";
+	public static var ADDED_TO_STAGE(default, never):EventType<Event> = "addedToStage";
 
 	// @:noCompletion @:dox(hide) @:require(flash15) public static var BROWSER_ZOOM_CHANGE:String;
 
@@ -116,7 +116,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | A reference to the object on which the operation is canceled. |
 	**/
-	public static inline var CANCEL:EventType<Event> = "cancel";
+	public static var CANCEL(default, never):EventType<Event> = "cancel";
 
 	/**
 		The `Event.CHANGE` constant defines the value of the `type` property
@@ -130,7 +130,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The object that has had its value modified. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var CHANGE:EventType<Event> = "change";
+	public static var CHANGE(default, never):EventType<Event> = "change";
 
 	// @:noCompletion @:dox(hide) public static var CHANNEL_MESSAGE:String;
 	// @:noCompletion @:dox(hide) public static var CHANNEL_STATE:String;
@@ -158,7 +158,7 @@ class Event
 		Text Engine (FTE), will dispatch these events in response to user
 		actions such as keyboard shortcuts and context menus.
 	**/
-	public static inline var CLEAR:EventType<Event> = "clear";
+	public static var CLEAR(default, never):EventType<Event> = "clear";
 
 	/**
 		The `Event.CLOSING` constant defines the value of the `type` property of
@@ -172,7 +172,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The object whose connection has been closed. |
 	**/
-	public static inline var CLOSING:EventType<Event> = "closing";
+	public static var CLOSING(default, never):EventType<Event> = "closing";
 
 	/**
 		The `Event.CLOSE` constant defines the value of the `type` property of
@@ -186,7 +186,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The object whose connection has been closed. |
 	**/
-	public static inline var CLOSE:EventType<Event> = "close";
+	public static var CLOSE(default, never):EventType<Event> = "close";
 
 	/**
 		The `Event.COMPLETE` constant defines the value of the `type` property
@@ -200,7 +200,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The network object that has completed loading. |
 	**/
-	public static inline var COMPLETE:EventType<Event> = "complete";
+	public static var COMPLETE(default, never):EventType<Event> = "complete";
 
 	/**
 		The `Event.CONNECT` constant defines the value of the `type` property
@@ -214,7 +214,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The Socket or XMLSocket object that has established a network connection. |
 	**/
-	public static inline var CONNECT:EventType<Event> = "connect";
+	public static var CONNECT(default, never):EventType<Event> = "connect";
 
 	/**
 		The `Event.CONTEXT3D_CREATE` constant defines the value of the type property of a
@@ -223,7 +223,7 @@ class Event
 		triggered reset of the Context3D bound to the Stage3D object. Inspect the
 		`Stage3D.context3D` property to get the newly created Context3D object.
 	**/
-	public static inline var CONTEXT3D_CREATE:EventType<Event> = "context3DCreate";
+	public static var CONTEXT3D_CREATE(default, never):EventType<Event> = "context3DCreate";
 
 	/**
 		Defines the value of the `type` property of a `copy` event object.
@@ -247,7 +247,7 @@ class Event
 		Text Engine (FTE), will dispatch these events in response to user
 		actions such as keyboard shortcuts and context menus.
 	**/
-	public static inline var COPY:EventType<Event> = "copy";
+	public static var COPY(default, never):EventType<Event> = "copy";
 
 	/**
 		Defines the value of the `type` property of a `cut` event object.
@@ -271,7 +271,7 @@ class Event
 		Text Engine (FTE), will dispatch these events in response to user
 		actions such as keyboard shortcuts and context menus.
 	**/
-	public static inline var CUT:EventType<Event> = "cut";
+	public static var CUT(default, never):EventType<Event> = "cut";
 
 	/**
 		The `Event.DEACTIVATE` constant defines the value of the `type`
@@ -292,7 +292,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | Any DisplayObject instance with a listener registered for the `deactivate` event. |
 	**/
-	public static inline var DEACTIVATE:EventType<Event> = "deactivate";
+	public static var DEACTIVATE(default, never):EventType<Event> = "deactivate";
 
 	/**
 		The `Event.ENTER_FRAME` constant defines the value of the `type`
@@ -310,7 +310,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | Any DisplayObject instance with a listener registered for the `enterFrame` event. |
 	**/
-	public static inline var ENTER_FRAME:EventType<Event> = "enterFrame";
+	public static var ENTER_FRAME(default, never):EventType<Event> = "enterFrame";
 
 	/**
 		The `Event.EXIT_FRAME` constant defines the value of the `type`
@@ -328,7 +328,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | Any DisplayObject instance with a listener registered for the `enterFrame` event. |
 	**/
-	public static inline var EXIT_FRAME:EventType<Event> = "exitFrame";
+	public static var EXIT_FRAME(default, never):EventType<Event> = "exitFrame";
 
 	/**
 		The `Event.EXITING` constant defines the value of the `type` property of
@@ -343,7 +343,7 @@ class Event
 		| `currentTarget` | The NativeApplication object. |
 		| `target` | The NativeApplication object. |
 	**/
-	public static inline var EXITING:EventType<Event> = "exiting";
+	public static var EXITING(default, never):EventType<Event> = "exiting";
 
 	/**
 		The `Event.FRAME_CONSTRUCTED` constant defines the value of the `type`
@@ -361,7 +361,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | Any DisplayObject instance with a listener registered for the `frameConstructed` event. |
 	**/
-	public static inline var FRAME_CONSTRUCTED:EventType<Event> = "frameConstructed";
+	public static var FRAME_CONSTRUCTED(default, never):EventType<Event> = "frameConstructed";
 
 	/**
 		The `Event.FRAME_LABEL` constant defines the value of the type property of a
@@ -379,7 +379,7 @@ class Event
 		| `currentTarget` | The FrameLabel object that is actively processing the Event object with an event listener. |
 		| `target` | Any FrameLabel instance with a listener registered for the frameLabel event. |
 	**/
-	public static inline var FRAME_LABEL:EventType<Event> = "frameLabel";
+	public static var FRAME_LABEL(default, never):EventType<Event> = "frameLabel";
 
 	/**
 		The `Event.FULL_SCREEN` constant defines the value of the `type`
@@ -393,7 +393,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The Stage object. |
 	**/
-	public static inline var FULLSCREEN:EventType<Event> = "fullScreen";
+	public static var FULLSCREEN(default, never):EventType<Event> = "fullScreen";
 
 	/**
 		The `Event.ID3` constant defines the value of the `type` property of
@@ -407,7 +407,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The Sound object loading the MP3 for which ID3 data is now available. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var ID3:EventType<Event> = "id3";
+	public static var ID3(default, never):EventType<Event> = "id3";
 
 	/**
 		The `Event.INIT` constant defines the value of the `type` property of
@@ -421,7 +421,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The LoaderInfo object associated with the SWF file being loaded. |
 	**/
-	public static inline var INIT:EventType<Event> = "init";
+	public static var INIT(default, never):EventType<Event> = "init";
 
 	/**
 		The `Event.MOUSE_LEAVE` constant defines the value of the `type`
@@ -435,7 +435,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The Stage object. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var MOUSE_LEAVE:EventType<Event> = "mouseLeave";
+	public static var MOUSE_LEAVE(default, never):EventType<Event> = "mouseLeave";
 
 	/**
 		The `Event.OPEN` constant defines the value of the `type` property of
@@ -449,7 +449,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The network object that has opened a connection. |
 	**/
-	public static inline var OPEN:EventType<Event> = "open";
+	public static var OPEN(default, never):EventType<Event> = "open";
 
 	/**
 		The `Event.PASTE` constant defines the value of the `type` property of
@@ -474,7 +474,7 @@ class Event
 		Text Engine (FTE), will dispatch these events in response to user
 		actions such as keyboard shortcuts and context menus.
 	**/
-	public static inline var PASTE:EventType<Event> = "paste";
+	public static var PASTE(default, never):EventType<Event> = "paste";
 
 	/**
 		The `Event.REMOVED` constant defines the value of the `type` property
@@ -488,7 +488,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The DisplayObject instance to be removed from the display list. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var REMOVED:EventType<Event> = "removed";
+	public static var REMOVED(default, never):EventType<Event> = "removed";
 
 	/**
 		The `Event.REMOVED_FROM_STAGE` constant defines the value of the
@@ -502,7 +502,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The DisplayObject instance being removed from the on stage display list, either directly or through the removal of a sub tree in which the DisplayObject instance is contained. If the DisplayObject instance is being directly removed, the `removed` event occurs before this event. |
 	**/
-	public static inline var REMOVED_FROM_STAGE:EventType<Event> = "removedFromStage";
+	public static var REMOVED_FROM_STAGE(default, never):EventType<Event> = "removedFromStage";
 
 	/**
 		The `Event.RENDER` constant defines the value of the `type` property
@@ -520,7 +520,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | Any DisplayObject instance with a listener registered for the `render` event. |
 	**/
-	public static inline var RENDER:EventType<Event> = "render";
+	public static var RENDER(default, never):EventType<Event> = "render";
 
 	/**
 		The `Event.RESIZE` constant defines the value of the `type` property
@@ -534,7 +534,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The Stage object. |
 	**/
-	public static inline var RESIZE:EventType<Event> = "resize";
+	public static var RESIZE(default, never):EventType<Event> = "resize";
 
 	/**
 		The `Event.SCROLL` constant defines the value of the `type` property
@@ -548,7 +548,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The TextField object that has been scrolled. The `target` property is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var SCROLL:EventType<Event> = "scroll";
+	public static var SCROLL(default, never):EventType<Event> = "scroll";
 
 	/**
 		The `Event.SELECT` constant defines the value of the `type` property
@@ -562,7 +562,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The object on which an item has been selected. |
 	**/
-	public static inline var SELECT:EventType<Event> = "select";
+	public static var SELECT(default, never):EventType<Event> = "select";
 
 	/**
 		The `Event.SELECT_ALL` constant defines the value of the `type`
@@ -587,7 +587,7 @@ class Event
 		Text Engine (FTE), will dispatch these events in response to user
 		actions such as keyboard shortcuts and context menus.
 	**/
-	public static inline var SELECT_ALL:EventType<Event> = "selectAll";
+	public static var SELECT_ALL(default, never):EventType<Event> = "selectAll";
 
 	/**
 		The `Event.SOUND_COMPLETE` constant defines the value of the `type`
@@ -601,7 +601,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The SoundChannel object in which a sound has finished playing. |
 	**/
-	public static inline var SOUND_COMPLETE:EventType<Event> = "soundComplete";
+	public static var SOUND_COMPLETE(default, never):EventType<Event> = "soundComplete";
 
 	/**
 		The `Event.TAB_CHILDREN_CHANGE` constant defines the value of the
@@ -615,7 +615,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The object whose tabChildren flag has changed. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var TAB_CHILDREN_CHANGE:EventType<Event> = "tabChildrenChange";
+	public static var TAB_CHILDREN_CHANGE(default, never):EventType<Event> = "tabChildrenChange";
 
 	/**
 		The `Event.TAB_ENABLED_CHANGE` constant defines the value of the
@@ -629,7 +629,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The InteractiveObject whose tabEnabled flag has changed. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var TAB_ENABLED_CHANGE:EventType<Event> = "tabEnabledChange";
+	public static var TAB_ENABLED_CHANGE(default, never):EventType<Event> = "tabEnabledChange";
 
 	/**
 		The `Event.TAB_INDEX_CHANGE` constant defines the value of the `type`
@@ -643,7 +643,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The object whose tabIndex has changed. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 	**/
-	public static inline var TAB_INDEX_CHANGE:EventType<Event> = "tabIndexChange";
+	public static var TAB_INDEX_CHANGE(default, never):EventType<Event> = "tabIndexChange";
 
 	/**
 		The `Event.TEXTURE_READY` constant defines the value of the type property of a
@@ -652,7 +652,7 @@ class Event
 		upload by using the `uploadCompressedTextureFromByteArray()` method on Texture or
 		CubeTexture. This event neither bubbles nor is cancelable.
 	**/
-	public static inline var TEXTURE_READY:EventType<Event> = "textureReady";
+	public static var TEXTURE_READY(default, never):EventType<Event> = "textureReady";
 
 	#if false
 	/**
@@ -682,7 +682,7 @@ class Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The LoaderInfo object associated with the SWF file being unloaded or replaced. |
 	**/
-	public static inline var UNLOAD:EventType<Event> = "unload";
+	public static var UNLOAD(default, never):EventType<Event> = "unload";
 
 	// @:noCompletion @:dox(hide) public static var VIDEO_FRAME:String;
 	// @:noCompletion @:dox(hide) public static var WORKER_STATE:String;
