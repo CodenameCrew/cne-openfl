@@ -29,7 +29,7 @@ class NativeWindowBoundsEvent extends Event
 		| `cancelable` | `true`; canceling this event object stops the move operation. |
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 	**/
-	public static inline var MOVING:EventType<NativeWindowBoundsEvent> = "moving";
+	public static var MOVING(default, never):EventType<NativeWindowBoundsEvent> = "moving";
 
 	/**
 		Defines the value of the type property of a `move` event object.
@@ -45,7 +45,7 @@ class NativeWindowBoundsEvent extends Event
 		| `cancelable` | `false`; There is no default behavior to cancel. |
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 	**/
-	public static inline var MOVE:EventType<NativeWindowBoundsEvent> = "move";
+	public static var MOVE(default, never):EventType<NativeWindowBoundsEvent> = "move";
 
 	/**
 		Defines the value of the type property of a `resizing` event object.
@@ -61,7 +61,7 @@ class NativeWindowBoundsEvent extends Event
 		| `cancelable` | `true`; canceling this event object stops the resize operation. |
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 	**/
-	public static inline var RESIZING:EventType<NativeWindowBoundsEvent> = "resizing";
+	public static var RESIZING(default, never):EventType<NativeWindowBoundsEvent> = "resizing";
 
 	/**
 		Defines the value of the type property of a `resize` event object.
@@ -77,7 +77,7 @@ class NativeWindowBoundsEvent extends Event
 		| `cancelable` | `false`; There is no default behavior to cancel. |
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 	**/
-	public static inline var RESIZE:EventType<NativeWindowBoundsEvent> = "resize";
+	public static var RESIZE(default, never):EventType<NativeWindowBoundsEvent> = "resize";
 
 	/**
 		The bounds of the window before the change.

@@ -72,7 +72,7 @@ class TouchEvent extends Event
 		| `target` | The InteractiveObject instance under the touching device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 		| `touchPointID` | A unique identification number (as an int) assigned to the touch point. |
 	**/
-	public static inline var TOUCH_BEGIN:EventType<TouchEvent> = "touchBegin";
+	public static var TOUCH_BEGIN(default, never):EventType<TouchEvent> = "touchBegin";
 
 	/**
 		Defines the value of the `type` property of a `TOUCH_END` touch event
@@ -102,7 +102,7 @@ class TouchEvent extends Event
 		| `target` | The InteractiveObject instance under the touching device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 		| `touchPointID` | A unique identification number (as an int) assigned to the touch point. |
 	**/
-	public static inline var TOUCH_END:EventType<TouchEvent> = "touchEnd";
+	public static var TOUCH_END(default, never):EventType<TouchEvent> = "touchEnd";
 
 	/**
 		Defines the value of the `type` property of a `TOUCH_MOVE` touch event
@@ -132,7 +132,7 @@ class TouchEvent extends Event
 		| `target` | The InteractiveObject instance under the touching device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 		| `touchPointID` | A unique identification number (as an int) assigned to the touch point. |
 	**/
-	public static inline var TOUCH_MOVE:EventType<TouchEvent> = "touchMove";
+	public static var TOUCH_MOVE(default, never):EventType<TouchEvent> = "touchMove";
 
 	/**
 		Defines the value of the `type` property of a `TOUCH_OUT` touch event
@@ -162,7 +162,7 @@ class TouchEvent extends Event
 		| `target` | The InteractiveObject instance under the touching device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 		| `touchPointID` | A unique identification number (as an int) assigned to the touch point. |
 	**/
-	public static inline var TOUCH_OUT:EventType<TouchEvent> = "touchOut";
+	public static var TOUCH_OUT(default, never):EventType<TouchEvent> = "touchOut";
 
 	/**
 		Defines the value of the `type` property of a `TOUCH_OVER` touch event
@@ -192,7 +192,7 @@ class TouchEvent extends Event
 		| `target` | The InteractiveObject instance under the touching device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 		| `touchPointID` | A unique identification number (as an int) assigned to the touch point. |
 	**/
-	public static inline var TOUCH_OVER:EventType<TouchEvent> = "touchOver";
+	public static var TOUCH_OVER(default, never):EventType<TouchEvent> = "touchOver";
 
 	/**
 		Defines the value of the `type` property of a `TOUCH_ROLL_OUT` touch
@@ -222,7 +222,7 @@ class TouchEvent extends Event
 		| `target` | The InteractiveObject instance under the touching device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 		| `touchPointID` | A unique identification number (as an int) assigned to the touch point. |
 	**/
-	public static inline var TOUCH_ROLL_OUT:EventType<TouchEvent> = "touchRollOut";
+	public static var TOUCH_ROLL_OUT(default, never):EventType<TouchEvent> = "touchRollOut";
 
 	/**
 		Defines the value of the `type` property of a `TOUCH_ROLL_OVER` touch
@@ -252,7 +252,7 @@ class TouchEvent extends Event
 		| `target` | The InteractiveObject instance under the touching device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 		| `touchPointID` | A unique identification number (as an int) assigned to the touch point. |
 	**/
-	public static inline var TOUCH_ROLL_OVER:EventType<TouchEvent> = "touchRollOver";
+	public static var TOUCH_ROLL_OVER(default, never):EventType<TouchEvent> = "touchRollOver";
 
 	/**
 		Defines the value of the `type` property of a `TOUCH_TAP` touch event
@@ -282,7 +282,7 @@ class TouchEvent extends Event
 		| `target` | The InteractiveObject instance under the touching device. The `target` is not always the object in the display list that registered the event listener. Use the `currentTarget` property to access the object in the display list that is currently processing the event. |
 		| `touchPointID` | A unique identification number (as an int) assigned to the touch point. |
 	**/
-	public static inline var TOUCH_TAP:EventType<TouchEvent> = "touchTap";
+	public static var TOUCH_TAP(default, never):EventType<TouchEvent> = "touchTap";
 
 	/**
 		Indicates whether the Alt key is active (`true`) or inactive
