@@ -33,7 +33,7 @@ class ScreenMouseEvent extends MouseEvent
 		| `shiftKey` | `true` if the Shift key is active; `false` if it is inactive. |
 		| `target` | The SystemTrayIcon instance under the pointing device. |
 	**/
-	public static inline var CLICK:EventType<ScreenMouseEvent> = "click";
+	public static var CLICK(default, never):EventType<ScreenMouseEvent> = "click";
 
 	/**
 		Defines the value of the `type` property of a `mouseDown` event object.
@@ -54,7 +54,7 @@ class ScreenMouseEvent extends MouseEvent
 		| `shiftKey` | `true` if the Shift key is active; `false` if it is inactive. |
 		| `target` | The SystemTrayIcon instance under the pointing device. |
 	**/
-	public static inline var MOUSE_DOWN:EventType<ScreenMouseEvent> = "mouseDown";
+	public static var MOUSE_DOWN(default, never):EventType<ScreenMouseEvent> = "mouseDown";
 
 	/**
 		Defines the value of the `type` property of a `mouseUp` event object.
@@ -75,7 +75,7 @@ class ScreenMouseEvent extends MouseEvent
 		| `shiftKey` | `true` if the Shift key is active; `false` if it is inactive. |
 		| `target` | The SystemTrayIcon instance under the pointing device. |
 	**/
-	public static inline var MOUSE_UP:EventType<ScreenMouseEvent> = "mouseUp";
+	public static var MOUSE_UP(default, never):EventType<ScreenMouseEvent> = "mouseUp";
 
 	/**
 		Defines the value of the `type` property of a `rightClick` event object.
@@ -96,7 +96,7 @@ class ScreenMouseEvent extends MouseEvent
 		| `shiftKey` | `true` if the Shift key is active; `false` if it is inactive. |
 		| `target` | The SystemTrayIcon instance under the pointing device. |
 	**/
-	public static inline var RIGHT_CLICK:EventType<ScreenMouseEvent> = "rightClick";
+	public static var RIGHT_CLICK(default, never):EventType<ScreenMouseEvent> = "rightClick";
 
 	/**
 		Defines the value of the `type` property of a `rightMouseDown` event object.
@@ -117,7 +117,7 @@ class ScreenMouseEvent extends MouseEvent
 		| `shiftKey` | `true` if the Shift key is active; `false` if it is inactive. |
 		| `target` | The SystemTrayIcon instance under the pointing device. |
 	**/
-	public static inline var RIGHT_MOUSE_DOWN:EventType<ScreenMouseEvent> = "rightMouseDown";
+	public static var RIGHT_MOUSE_DOWN(default, never):EventType<ScreenMouseEvent> = "rightMouseDown";
 
 	/**
 		Defines the value of the `type` property of a `rightMouseUp` event object.
@@ -138,7 +138,7 @@ class ScreenMouseEvent extends MouseEvent
 		| `shiftKey` | `true` if the Shift key is active; `false` if it is inactive. |
 		| `target` | The SystemTrayIcon instance under the pointing device. |
 	**/
-	public static inline var RIGHT_MOUSE_UP:EventType<ScreenMouseEvent> = "rightMouseUp";
+	public static var RIGHT_MOUSE_UP(default, never):EventType<ScreenMouseEvent> = "rightMouseUp";
 
 	/**
 		The X position of the click in screen coordinates.
