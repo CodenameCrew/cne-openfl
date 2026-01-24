@@ -14,7 +14,7 @@ class OutputProgressEvent extends Event
 		Defines the value of the `type` property of an `outputProgress` event
 		object.
 	**/
-	public static inline var OUTPUT_PROGRESS:EventType<OutputProgressEvent> = "outputProgress";
+	public static var OUTPUT_PROGRESS(default, never):EventType<OutputProgressEvent> = "outputProgress";
 
 	/**
 		The number of bytes not yet written when the listener processes the
