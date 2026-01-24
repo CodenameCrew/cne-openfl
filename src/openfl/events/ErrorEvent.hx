@@ -40,7 +40,7 @@ class ErrorEvent extends TextEvent
 		| `target` | The object experiencing a network operation failure. |
 		| `text` | Text to be displayed as an error message. |
 	**/
-	public static inline var ERROR:EventType<ErrorEvent> = "error";
+	public static var ERROR(default, never):EventType<ErrorEvent> = "error";
 
 	/**
 		Contains the reference number associated with the specific error. For a

@@ -35,7 +35,7 @@ class ProgressEvent extends Event
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 		| `target` | The object reporting progress.  |
 	**/
-	public static inline var PROGRESS:EventType<ProgressEvent> = "progress";
+	public static var PROGRESS(default, never):EventType<ProgressEvent> = "progress";
 
 	/**
 		Defines the value of the `type` property of a `socketData` event
@@ -51,7 +51,7 @@ class ProgressEvent extends Event
 		| `bytesTotal` | 0; this property is not used by `socketData` event objects. |
 		| `target` | The socket reporting progress. |
 	**/
-	public static inline var SOCKET_DATA:EventType<ProgressEvent> = "socketData";
+	public static var SOCKET_DATA(default, never):EventType<ProgressEvent> = "socketData";
 
 	#if (haxe4 && sys)
 	/**
@@ -68,7 +68,7 @@ class ProgressEvent extends Event
 		| `bytesTotal` | 0; this property is not used by `standardOutputData` event objects. |
 		| `target` | The NativeProcess object reporting output data. |
 	**/
-	public static inline var STANDARD_OUTPUT_DATA:EventType<ProgressEvent> = "standardOutputData";
+	public static var STANDARD_OUTPUT_DATA(default, never):EventType<ProgressEvent> = "standardOutputData";
 
 	/**
 		Defines the value of the `type` property of a `standardErrorData` event
@@ -84,7 +84,7 @@ class ProgressEvent extends Event
 		| `bytesTotal` | 0; this property is not used by `standardErrorData` event objects. |
 		| `target` | The NativeProcess object reporting output data. |
 	**/
-	public static inline var STANDARD_ERROR_DATA:EventType<ProgressEvent> = "standardErrorData";
+	public static var STANDARD_ERROR_DATA(default, never):EventType<ProgressEvent> = "standardErrorData";
 	#end
 
 	/**

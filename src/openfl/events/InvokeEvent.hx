@@ -39,7 +39,7 @@ class InvokeEvent extends Event
 		The `InvokeEvent.INVOKE` constant defines the value of the `type`
 		property of an InvokeEvent object.
 	**/
-	public static inline var INVOKE:EventType<InvokeEvent> = "invoke";
+	public static var INVOKE(default, never):EventType<InvokeEvent> = "invoke";
 
 	/**
 		The array of string arguments passed during this invocation. If this is

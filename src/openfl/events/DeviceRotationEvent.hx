@@ -18,7 +18,7 @@ class DeviceRotationEvent extends Event
 	/**
 		Defines the value of the `type` property of a `update` event object.
 	**/
-	public static inline var UPDATE:EventType<DeviceRotationEvent> = "update";
+	public static var UPDATE(default, never):EventType<DeviceRotationEvent> = "update";
 
 	/**
 		The number of milliseconds at the time of the event since the runtime

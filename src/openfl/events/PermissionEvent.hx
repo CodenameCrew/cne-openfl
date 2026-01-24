@@ -15,7 +15,7 @@ import openfl.permissions.PermissionStatus;
 #end
 class PermissionEvent extends Event
 {
-	public static inline var PERMISSION_STATUS:EventType<PermissionEvent> = "permissionStatus";
+	public static var PERMISSION_STATUS(default, never):EventType<PermissionEvent> = "permissionStatus";
 
 	/**
 		Check whether the permission has been granted or denied.

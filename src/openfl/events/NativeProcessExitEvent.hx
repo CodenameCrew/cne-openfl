@@ -18,7 +18,7 @@ class NativeProcessExitEvent extends Event
 	/**
 		Defines the value of the type property of a exit event object.
 	**/
-	public static inline var EXIT:EventType<NativeProcessExitEvent> = "exit";
+	public static var EXIT(default, never):EventType<NativeProcessExitEvent> = "exit";
 
 	/**
 		The exit code that the native process returned to the host operating

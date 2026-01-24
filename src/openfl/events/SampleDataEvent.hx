@@ -102,7 +102,7 @@ class SampleDataEvent extends Event
 		| `cancelable` | `false`; there is no default behavior to cancel. |
 		| `position` | The point from which audio data is provided. |
 	**/
-	public static inline var SAMPLE_DATA:EventType<SampleDataEvent> = "sampleData";
+	public static var SAMPLE_DATA(default, never):EventType<SampleDataEvent> = "sampleData";
 
 	// using @:keep on data/position vars because Haxe removes them with
 	// dce full on some targets (at least cpp and hl), but doesn't remove the
@@ -180,17 +180,6 @@ class SampleDataEvent extends Event
 	private function getBufferSize():Int
 	{
 		var bufferSize:Int = Std.int(data.length / 4 / 2);
-		if (bufferSize > 0)
-		{
-			if (bufferSize >= 2048 && bufferSize <= 8192)
-			{
-				return bufferSize;
-			}
-			else
-			{
-				throw new Error("To be consistent with flash the listener function registered to SampleDataEvent has to provide between 2048 and 8192 samples.");
-			}
-		}
 		return bufferSize;
 	}
 

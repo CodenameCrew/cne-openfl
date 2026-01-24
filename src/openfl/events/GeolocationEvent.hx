@@ -18,7 +18,7 @@ class GeolocationEvent extends Event
 	/**
 		Defines the value of the `type` property of a `update` event object.
 	**/
-	public static inline var UPDATE:EventType<DeviceRotationEvent> = "update";
+	public static var UPDATE(default, never):EventType<DeviceRotationEvent> = "update";
 
 	/**
 		The latitude in degrees. The latitude values have the following range:

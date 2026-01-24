@@ -27,7 +27,7 @@ class NetStatusEvent extends Event
 		| `info` | An object with properties that describe the object's status or error condition. |
 		| `target` | The NetConnection or NetStream object reporting its status. |
 	**/
-	public static inline var NET_STATUS:EventType<NetStatusEvent> = "netStatus";
+	public static var NET_STATUS(default, never):EventType<NetStatusEvent> = "netStatus";
 
 	/**
 		An object with properties that describe the object's status or error

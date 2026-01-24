@@ -2,7 +2,7 @@ package openfl.events;
 
 class StatusEvent extends Event
 {
-	public static inline var STATUS:EventType<StatusEvent> = "status";
+	public static var STATUS(default, never):EventType<StatusEvent> = "status";
 
 	public var code:String;
 	public var level:String;
