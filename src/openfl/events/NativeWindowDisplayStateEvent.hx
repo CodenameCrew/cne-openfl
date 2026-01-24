@@ -26,7 +26,7 @@ class NativeWindowDisplayStateEvent extends Event
 		| `cancelable` | `true`; canceling the event will prevent the change. |
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 	**/
-	public static inline var DISPLAY_STATE_CHANGING:EventType<NativeWindowDisplayStateEvent> = "displayStateChanging";
+	public static var DISPLAY_STATE_CHANGING(default, never):EventType<NativeWindowDisplayStateEvent> = "displayStateChanging";
 
 	/**
 		Defines the value of the `type` property of a `displayStateChange` event object.
@@ -42,7 +42,7 @@ class NativeWindowDisplayStateEvent extends Event
 		| `cancelable` | `false`; There is no default behavior to cancel. |
 		| `currentTarget` | The object that is actively processing the Event object with an event listener. |
 	**/
-	public static inline var DISPLAY_STATE_CHANGE:EventType<NativeWindowDisplayStateEvent> = "displayStateChange";
+	public static var DISPLAY_STATE_CHANGE(default, never):EventType<NativeWindowDisplayStateEvent> = "displayStateChange";
 
 	/**
 		The display state of the NativeWindow before the change.
