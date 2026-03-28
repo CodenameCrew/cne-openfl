@@ -9,6 +9,7 @@
 	<!-- <set name="lime-version" value="${expect-lime-version}" if="setup" unless="lime-version" /> -->
 
 	<define name="openfl-funkin" />
+	<define name="openfl-cne" />
 
 	<haxedef name="native" if="cpp || neko" />
 	<set name="native" if="cpp || neko" />

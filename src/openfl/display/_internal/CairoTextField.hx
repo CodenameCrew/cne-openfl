@@ -162,6 +162,11 @@ class CairoTextField
 			graphics.__visible = true;
 			graphics.__managed = true;
 
+			if (graphics.__bitmap != null)
+			{
+				graphics.__bitmap.dispose();
+			}
+
 			graphics.__bitmap = bitmap;
 
 			cairo = graphics.__cairo;
@@ -450,6 +455,7 @@ class CairoTextField
 						cairo.closePath();
 					}
 
+					#if (openfl >= "9.5.0")
 					if (group.format.strikethrough)
 					{
 						#if (lime >= "8.3.0")
@@ -485,6 +491,7 @@ class CairoTextField
 						cairo.stroke();
 						cairo.closePath();
 					}
+					#end
 				}
 			}
 		}

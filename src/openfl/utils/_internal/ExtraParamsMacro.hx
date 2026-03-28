@@ -29,6 +29,8 @@ class ExtraParamsMacro
 			}
 			#end
 		}
+
+		Compiler.define("CNE_OPENFL");
 	}
 
 	public static function includeExterns():Void
