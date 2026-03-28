@@ -150,8 +150,8 @@ package openfl.media;
 		var i = __soundChannels.length;
 		while (i > 0)
 		{
-			i--;
 			__soundChannels[i].stop();
+			i--;
 		}
 	}
 
@@ -177,12 +177,12 @@ package openfl.media;
 		var i = __soundChannels.length;
 		while (i > 0)
 		{
-			i--;
 			var channel = __soundChannels[i];
 			if (channel.__audioSource.buffer == buffer)
 			{
 				channel.stop();
 			}
+			i--;
 		}
 	}
 	#end
