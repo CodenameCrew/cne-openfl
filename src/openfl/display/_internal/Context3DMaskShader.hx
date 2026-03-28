@@ -10,8 +10,6 @@ import openfl.display.Shader;
 #end
 class Context3DMaskShader extends Shader
 {
-	public static var opaqueBitmapData:BitmapData = new BitmapData(1, 1, false, 0);
-
 	@:glFragmentHeader("varying vec2 openfl_TextureCoordv;
 
 		uniform sampler2D openfl_Texture;")

@@ -9,6 +9,7 @@ import openfl.utils._internal.UInt16Array;
 import openfl.display.BitmapData;
 import openfl.display.Graphics;
 import openfl.display.OpenGLRenderer;
+import openfl.display3D.Context3DCompareMode;
 import openfl.geom.ColorTransform;
 import openfl.geom.Matrix;
 import openfl.geom.Rectangle;
@@ -34,7 +35,8 @@ import openfl.display._internal.stats.DrawCallContext;
 @SuppressWarnings("checkstyle:FieldDocComment")
 class Context3DGraphics
 {
-	private static var blankBitmapData = new BitmapData(1, 1, false, 0);
+	public static var blankBitmapData:BitmapData = new BitmapData(1, 1, false, 0);
+
 	private static var maskRender:Bool;
 	private static var tempColorTransform = new ColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
 	private static var tempVerticesVector:Vector<Float> = new Vector<Float>();
@@ -227,7 +229,7 @@ class Context3DGraphics
 					var hasIndices = (indices != null);
 					var transformABCD = false, transformXY = false;
 
-					var length = hasIndices ? indices.length : Math.floor(rects.length / 4);
+					var length = hasIndices ? indices.length : rects.length >> 2;
 					if (length == 0) return;
 
 					if (transforms != null)
@@ -609,6 +611,9 @@ class Context3DGraphics
 				case OVERRIDE_BLEND_MODE:
 					data.skip(type);
 
+				case OVERRIDE_DEPTH_TEST:
+					data.skip(type);
+
 				default:
 					data.destroy();
 					return false;
@@ -679,7 +684,7 @@ class Context3DGraphics
 			var width = graphics.__width;
 			var height = graphics.__height;
 
-			if (bounds != null && width >= 1 && height >= 1)
+			if (bounds != null && width > 0 && height > 0)
 			{
 				if (graphics.__hardwareDirty
 					|| (graphics.__quadBuffer == null && graphics.__vertexBuffer == null && graphics.__vertexBufferUVT == null))
@@ -703,8 +708,7 @@ class Context3DGraphics
 				var context = renderer.__context3D;
 				var gl = context.gl;
 
-				var matrix = Matrix.__pool.get();
-
+				var matrix:Matrix = null;
 				var shaderBuffer:ShaderBuffer = null;
 				var bitmap:BitmapData = null;
 				var bitmapMatrix:Matrix = null;
@@ -741,7 +745,7 @@ class Context3DGraphics
 						var vertexBuffer = hasUVTData ? graphics.__vertexBufferUVT : graphics.__vertexBuffer;
 						var bufferPosition = hasUVTData ? vertexBufferPositionUVT : vertexBufferPosition;
 
-						var uMatrix = renderer.__getMatrix(graphics.__owner.__renderTransform, AUTO);
+						var uMatrix = renderer.__getMatrix(graphics.__owner.__renderTransform, NEVER);
 						var shader:Shader;
 
 						if (shaderBuffer != null && !maskRender)
@@ -750,9 +754,9 @@ class Context3DGraphics
 
 							renderer.__setShaderBuffer(shaderBuffer);
 							renderer.applyMatrix(uMatrix);
-							renderer.applyBitmapData(bitmap, false, repeat);
-							renderer.applyAlpha(1);
-							renderer.applyColorTransform(null);
+							renderer.applyBitmapData(bitmap, smooth, repeat);
+							renderer.applyAlpha(graphics.__owner.__worldAlpha);
+							renderer.applyColorTransform(graphics.__owner.__worldColorTransform);
 							renderer.__updateShaderBuffer(shaderBufferOffset);
 						}
 						else if (bitmap != null)
@@ -770,7 +774,7 @@ class Context3DGraphics
 							shader = maskRender ? renderer.__maskShader : renderer.__initGraphicsShader(null);
 							renderer.setShader(shader);
 							renderer.applyMatrix(uMatrix);
-							renderer.applyBitmapData(blankBitmapData, true, repeat);
+							renderer.applyBitmapData(blankBitmapData, false, repeat);
 							#if lime
 							var color:ARGB = (fill : ARGB);
 							var worldColorTransform = graphics.__owner.__worldColorTransform;
@@ -865,10 +869,7 @@ class Context3DGraphics
 
 						case BEGIN_FILL:
 							var c = data.readBeginFill();
-							var color = Std.int(c.color);
-							var alpha = Std.int(c.alpha * 0xFF);
-
-							fill = (color & 0xFFFFFF) | (alpha << 24);
+							fill = (Std.int(c.color) & 0xFFFFFF) | (Std.int(c.alpha * 0xFF) << 24);
 							shaderBuffer = null;
 							bitmap = null;
 							bitmapMatrix = null;
@@ -894,20 +895,13 @@ class Context3DGraphics
 							if (bitmap != null || fill != null)
 							{
 								var c = data.readDrawQuads();
-								var rects = c.rects;
-								var indices = c.indices;
-								var transforms = c.transforms;
 
-								#if cpp
-								var rects:Array<Float> = rects == null ? null : untyped (rects).__array;
-								var indices:Array<Int> = indices == null ? null : untyped (indices).__array;
-								var transforms:Array<Float> = transforms == null ? null : untyped (transforms).__array;
-								#end
+								var length:Int;
+								if (c.indices != null) length = c.indices.length;
+								else if (c.rects != null) length = c.rects.length >> 2;
+								else length = 0;
 
-								var hasIndices = (indices != null);
-								var length = hasIndices ? indices.length : Math.floor(rects.length / 4);
-
-								var uMatrix = renderer.__getMatrix(graphics.__owner.__renderTransform, AUTO);
+								var uMatrix = renderer.__getMatrix(graphics.__owner.__renderTransform, NEVER);
 								var shader:Shader;
 
 								if (shaderBuffer != null && !maskRender)
@@ -936,7 +930,7 @@ class Context3DGraphics
 									shader = maskRender ? renderer.__maskShader : renderer.__initGraphicsShader(null);
 									renderer.setShader(shader);
 									renderer.applyMatrix(uMatrix);
-									renderer.applyBitmapData(blankBitmapData, true, repeat);
+									renderer.applyBitmapData(blankBitmapData, false, false);
 									#if lime
 									var color:ARGB = (fill : ARGB);
 									var worldColorTransform = graphics.__owner.__worldColorTransform;
@@ -986,6 +980,7 @@ class Context3DGraphics
 
 								renderer.__clearShader();
 							}
+
 						case DRAW_CIRCLE:
 							var c = data.readDrawCircle();
 							var radius = c.radius;
@@ -1047,6 +1042,7 @@ class Context3DGraphics
 									height = (scaledBottom - scaledTop) / graphics.__owner.scaleY;
 								}
 
+								if (matrix == null) matrix = Matrix.__pool.get();
 								matrix.identity();
 								matrix.scale(width, height);
 								matrix.tx = x;
@@ -1056,7 +1052,7 @@ class Context3DGraphics
 								var shader = maskRender ? renderer.__maskShader : renderer.__initGraphicsShader(null);
 								renderer.setShader(shader);
 								renderer.applyMatrix(renderer.__getMatrix(matrix, AUTO));
-								renderer.applyBitmapData(blankBitmapData, true, repeat);
+								renderer.applyBitmapData(blankBitmapData, false, false);
 								#if lime
 								var color:ARGB = (fill : ARGB);
 								var worldColorTransform = graphics.__owner.__worldColorTransform;
@@ -1107,6 +1103,8 @@ class Context3DGraphics
 							shaderBuffer = null;
 							data.skip(type);
 							context.setCulling(NONE);
+							context.__setGLDepthTest(false);
+							context.setDepthTest(false, ALWAYS);
 
 						case MOVE_TO:
 							var c = data.readMoveTo();
@@ -1117,12 +1115,17 @@ class Context3DGraphics
 							var c = data.readOverrideBlendMode();
 							renderer.__setBlendMode(c.blendMode);
 
+						case OVERRIDE_DEPTH_TEST:
+							var c = data.readOverrideDepthTest();
+							context.__setGLDepthTest(c.depthTest);
+							context.setDepthTest(c.depthTest, c.compareMode);
+
 						default:
 							data.skip(type);
 					}
 				}
 
-				Matrix.__pool.release(matrix);
+				if (matrix != null) Matrix.__pool.release(matrix);
 			}
 
 			graphics.__dirty = false;

@@ -49,7 +49,7 @@ import openfl.display.Shader;
 #end
 class ConvolutionFilter extends BitmapFilter
 {
-	@:noCompletion private static var __convolutionShader:ConvolutionShader = new ConvolutionShader();
+	@:noCompletion private var __convolutionShader:ConvolutionShader = new ConvolutionShader();
 
 	/**
 		The alpha transparency value of the substitute color. Valid values are
