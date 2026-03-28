@@ -100,6 +100,10 @@ import js.html.CanvasRenderingContext2D;
 	@:noCompletion private var __bitmap:BitmapData;
 	@:noCompletion private var __bitmapScaleX:Float;
 	@:noCompletion private var __bitmapScaleY:Float;
+	// CNE BACKWARD COMPATIBILITY
+	@:noCompletion private var __bitmapScale(get, set):Float;
+	inline function get___bitmapScale() return __bitmapScaleX;
+	inline function set___bitmapScale(value:Float) return __bitmapScaleX = value;
 
 	@:noCompletion private function new(owner:DisplayObject)
 	{
@@ -1662,15 +1666,13 @@ import js.html.CanvasRenderingContext2D;
 		__bitmap = null;
 
 		#if (js && html5)
-		if (__canvas != null)
-		{
+		if (__canvas != null) {
 			__canvas.width = 0;
 			__canvas.height = 0;
 			__canvas = null;
 		}
 
-		if (__context != null)
-		{
+		if (__context != null) {
 			__context.clearRect(0, 0, 0, 0);
 			__context = null;
 		}
@@ -1698,6 +1700,7 @@ import js.html.CanvasRenderingContext2D;
 
 		if (px > __bounds.x && py > __bounds.y && __bounds.contains(px, py))
 		{
+			/*
 			if (shapeFlag)
 			{
 				#if (js && html5)
@@ -1706,6 +1709,7 @@ import js.html.CanvasRenderingContext2D;
 				return CairoGraphics.hitTest(this, px, py);
 				#end
 			}
+			*/
 
 			return true;
 		}

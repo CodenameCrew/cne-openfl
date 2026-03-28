@@ -149,6 +149,11 @@ class TextureBase extends EventDispatcher
 				if ((gl : Dynamic).COMPRESSED_RGB8_ETC2 != null) __compressedFormats[ATFGPUFormat.ETC2] = (gl : Dynamic).COMPRESSED_RGB8_ETC2;
 				if ((gl : Dynamic).COMPRESSED_RGBA8_ETC2_EAC != null) __compressedFormatsAlpha[ATFGPUFormat.ETC2] = (gl : Dynamic).COMPRESSED_RGBA8_ETC2_EAC;
 			}
+			#else
+			if (etc2Extension != null)
+			{
+				// TODO: Add ETC2 Support for Native?
+			}
 			#end
 
 			if (pvrtcExtension != null)
@@ -385,11 +390,12 @@ class TextureBase extends EventDispatcher
 			gl.texParameteri(__textureTarget, gl.TEXTURE_WRAP_S, wrapModeS);
 			gl.texParameteri(__textureTarget, gl.TEXTURE_WRAP_T, wrapModeT);
 
-			if (state.lodBias != 0.0)
+			#if lime
+			if (__context.__context.type == OPENGL)
 			{
-				// TODO
-				// throw new IllegalOperationError("Lod bias setting not supported yet");
+				gl.texParameterf(__textureTarget, 0x8501, state.lodBias); // GL_TEXTURE_LOD_BIAS
 			}
+			#end
 
 			if (__samplerState == null) __samplerState = state.clone();
 			__samplerState.copyFrom(state);
