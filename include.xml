@@ -24,6 +24,8 @@
 	</section>
 
 	<define name="openfl-funkin" />
+	<define name="openfl-cne" />
+	<define name="CNE_OPENFL" />
 
 	<section unless="lime-funkin || setup || create || disable-version-check || display">
 
