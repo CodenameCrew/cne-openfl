@@ -1323,6 +1323,7 @@ class TextEngine
 			var bufferCount:Int;
 			var placeIndex:Int;
 			var positionWidth:Float;
+
 			var currentPosition:#if (js && html5) Float #else GlyphPosition #end;
 
 			var tempWidth = getPositionsWidth(remainingPositions);
