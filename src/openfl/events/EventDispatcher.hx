@@ -199,11 +199,7 @@ class EventDispatcher implements IEventDispatcher
 		{
 			var list = new Array<Listener>();
 			list.push(new Listener(listener, useCapture, priority, useWeakReference));
-
-			var iterator = new DispatchIterator(list);
-
 			__eventMap.set(type, list);
-			__iterators.set(type, [iterator]);
 		}
 		else
 		{
@@ -215,12 +211,14 @@ class EventDispatcher implements IEventDispatcher
 			}
 
 			var iterators = __iterators.get(type);
-
-			for (iterator in iterators)
+			if (iterators != null)
 			{
-				if (iterator.active)
+				for (iterator in iterators)
 				{
-					iterator.copy();
+					if (iterator.active)
+					{
+						iterator.copy();
+					}
 				}
 			}
 
@@ -312,9 +310,12 @@ class EventDispatcher implements IEventDispatcher
 		{
 			if (list[i].match(listener, useCapture))
 			{
-				for (iterator in iterators)
+				if (iterators != null)
 				{
-					iterator.remove(list[i], i);
+					for (iterator in iterators)
+					{
+						iterator.remove(list[i], i);
+					}
 				}
 
 				list.splice(i, 1);
@@ -387,6 +388,13 @@ class EventDispatcher implements IEventDispatcher
 		var capture = (event.eventPhase == EventPhase.CAPTURING_PHASE);
 
 		var iterators = __iterators.get(type);
+		if (iterators == null)
+		{
+			// if this is the first time dispatching this event type,
+			// we won't have created any iterators yet
+			iterators = [new DispatchIterator(list)];
+			__iterators.set(type, iterators);
+		}
 		var iterator = iterators[0];
 
 		if (iterator.active)
