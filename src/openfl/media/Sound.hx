@@ -695,10 +695,11 @@ class Sound extends EventDispatcher
 
 		#if lime
 		var audioBuffer = new AudioBuffer();
+		audioBuffer.bitsPerSample = bitsPerSample;
 		audioBuffer.channels = channels;
-		audioBuffer.dataFormat = (format == "float" ? F32 : S16);
 		audioBuffer.data = new UInt8Array(bytes);
 		audioBuffer.sampleRate = Std.int(sampleRate);
+
 		__buffer = audioBuffer;
 
 		#if openfl_pool_events
@@ -853,30 +854,23 @@ class Sound extends EventDispatcher
 		#if lime
 		if (__buffer != null)
 		{
-			#if (js && html5 && lime_howlerjs)
-			if (__buffer.__srcHowlerDefaultSprite != null)
-			{
-				var sprite = untyped __buffer.src._sprite[__buffer.__srcHowlerDefaultSprite];
-
-				if (sprite != null)
-				{
-					return sprite[1];
-				}
-			}
-
+			#if (js && html5 && howlerjs)
 			return __buffer.src.duration() * 1000;
 			#else
-			if (__buffer.data != null)
+			#if lime_funkin
+			if (__buffer.decoder != null)
 			{
-				var bytesPerFrame = __buffer.channels * (__buffer.bitsPerSample / 8.0);
-				var totalFrames = __buffer.data.length / bytesPerFrame;
-
-				return (totalFrames / __buffer.sampleRate) * 1000.0;
+				var samples:Int64 = __buffer.decoder.total();
+				return (samples.high * 4294967296.0 + (samples.low >>> 0)) / __buffer.decoder.sampleRate * 1000;
 			}
-			else
+			#else
+			if (__buffer.__srcVorbisFile != null)
 			{
-				return 0;
+				var samples:Int64 = __buffer.__srcVorbisFile.pcmTotal();
+				return (samples.high * 4294967296.0 + (samples.low >>> 0)) / __buffer.sampleRate * 1000;
 			}
+			#end
+			else if (__buffer.data != null) return __buffer.data.length / (__buffer.bitsPerSample >> 3) / __buffer.channels / __buffer.sampleRate * 1000;
 			#end
 		}
 		#end

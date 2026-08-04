@@ -346,7 +346,12 @@ class Assets
 
 	public static function getMusic(id:String, useCache:Bool = true):Sound
 	{
-		// TODO: Streaming sound
+		#if (lime_funkin && lime_native)
+		var path = getPath(id);
+		var buffer = AudioBuffer.fromFile(path, true);
+		if (buffer != null) return Sound.fromAudioBuffer(buffer);
+		#end
+
 		return getSound(id, useCache);
 	}
 
@@ -791,6 +796,17 @@ class Assets
 		#if !html5
 		var promise = new Promise<Sound>();
 
+		if (useCache && cache.enabled && cache.hasSound(id))
+		{
+			var sound = cache.getSound(id);
+
+			if (isValidSound(sound))
+			{
+				promise.complete(sound);
+				return promise.future;
+			}
+		}
+
 		LimeAssets.loadAudioBuffer(id, useCache)
 			.onComplete(function(buffer)
 			{
@@ -887,6 +903,17 @@ class Assets
 
 		#if lime
 		var promise = new Promise<Sound>();
+
+		if (useCache && cache.enabled && cache.hasSound(id))
+		{
+			var sound = cache.getSound(id);
+
+			if (isValidSound(sound))
+			{
+				promise.complete(sound);
+				return promise.future;
+			}
+		}
 
 		LimeAssets.loadAudioBuffer(id, useCache)
 			.onComplete(function(buffer)
