@@ -1856,7 +1856,7 @@ import js.html.CanvasRenderingContext2D;
 
 					var c = data.readLineGradientStyle();
 				// stroke = new GraphicsStroke (c.thickness, c.pixelHinting, c.scaleMode, c.caps, c.joints, c.miterLimit);
-				// stroke.fill = new GraphicsGradientFill (c.type, c.colors, c.alphas, c.ratios, c.matrix, c.spreadMethod, c.interpolationMethod, c.focalPointRatio);
+				// stroke.fill = new GraphicsGradientFill (c.type, c.colors, c.alphas, c.ratios, c.matrix.clone(), c.spreadMethod, c.interpolationMethod, c.focalPointRatio);
 				// graphicsData.push (stroke);
 
 				case LINE_BITMAP_STYLE:
@@ -1865,7 +1865,7 @@ import js.html.CanvasRenderingContext2D;
 					var c = data.readLineBitmapStyle();
 					path = null;
 				// stroke = new GraphicsStroke (c.thickness, c.pixelHinting, c.scaleMode, c.caps, c.joints, c.miterLimit);
-				// stroke.fill = new GraphicsBitmapFill (c.bitmap, c.matrix, c.repeat, c.smooth);
+				// stroke.fill = new GraphicsBitmapFill (c.bitmap, c.matrix.clone(), c.repeat, c.smooth);
 				// graphicsData.push (stroke);
 
 				case LINE_STYLE:
@@ -1880,7 +1880,7 @@ import js.html.CanvasRenderingContext2D;
 
 				case BEGIN_BITMAP_FILL:
 					var c = data.readBeginBitmapFill();
-					graphicsData.push(new GraphicsBitmapFill(c.bitmap, c.matrix, c.repeat, c.smooth));
+					graphicsData.push(new GraphicsBitmapFill(c.bitmap, c.matrix.clone(), c.repeat, c.smooth));
 
 				case BEGIN_FILL:
 					var c = data.readBeginFill();
@@ -1888,7 +1888,7 @@ import js.html.CanvasRenderingContext2D;
 
 				case BEGIN_GRADIENT_FILL:
 					var c = data.readBeginGradientFill();
-					graphicsData.push(new GraphicsGradientFill(c.type, c.colors, c.alphas, c.ratios, c.matrix, c.spreadMethod, c.interpolationMethod,
+					graphicsData.push(new GraphicsGradientFill(c.type, c.colors, c.alphas, c.ratios, c.matrix.clone(), c.spreadMethod, c.interpolationMethod,
 						c.focalPointRatio));
 
 				case BEGIN_SHADER_FILL:

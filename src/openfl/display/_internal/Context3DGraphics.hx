@@ -60,7 +60,9 @@ class Context3DGraphics
 		var bitmapMatrix:Matrix = null;
 
 		var scale9Grid:Rectangle = graphics.__owner.__scale9Grid;
-		var hasScale9Grid = scale9Grid != null && !graphics.__owner.__isMask && graphics.__worldTransform.b == 0 && graphics.__worldTransform.c == 0;
+		// no scale9Grid for masks
+		// no scale9Grid for rotation 0.02 degrees or higher (less than 0.02 is allowed in flash)
+		var hasScale9Grid = scale9Grid != null && !graphics.__owner.__isMask && Math.abs(graphics.__owner.__rotation) < 0.02;
 		if (!hasScale9Grid)
 		{
 			scale9Grid = null;
@@ -528,6 +530,9 @@ class Context3DGraphics
 		data.buffer = graphics.__commands;
 
 		var hasColorFill = false, hasBitmapFill = false, hasShaderFill = false;
+		// for each fill, allow drawing one shape only because the two shapes
+		// might intersect and require a cutout. fall back to software for that.
+		var hasDrawnFilledShape = false;
 
 		for (type in graphics.__commands.types)
 		{
@@ -543,23 +548,27 @@ class Context3DGraphics
 					hasBitmapFill = true;
 					hasColorFill = false;
 					hasShaderFill = false;
+					hasDrawnFilledShape = false;
 					data.skip(type);
 
 				case BEGIN_FILL:
 					hasBitmapFill = false;
 					hasColorFill = true;
 					hasShaderFill = false;
+					hasDrawnFilledShape = false;
 					data.skip(type);
 
 				case BEGIN_SHADER_FILL:
 					hasBitmapFill = false;
 					hasColorFill = false;
 					hasShaderFill = true;
+					hasDrawnFilledShape = false;
 					data.skip(type);
 
 				case DRAW_QUADS:
-					if (hasColorFill || hasBitmapFill || hasShaderFill)
+					if (!hasDrawnFilledShape && (hasColorFill || hasBitmapFill || hasShaderFill))
 					{
+						hasDrawnFilledShape = true;
 						data.skip(type);
 					}
 					else
@@ -569,8 +578,9 @@ class Context3DGraphics
 					}
 
 				case DRAW_RECT:
-					if (hasColorFill || hasBitmapFill || hasShaderFill)
+					if (!hasDrawnFilledShape && (hasColorFill || hasBitmapFill || hasShaderFill))
 					{
+						hasDrawnFilledShape = true;
 						data.skip(type);
 					}
 					else
@@ -580,8 +590,9 @@ class Context3DGraphics
 					}
 
 				case DRAW_TRIANGLES:
-					if (hasColorFill || hasBitmapFill || hasShaderFill)
+					if (!hasDrawnFilledShape && (hasColorFill || hasBitmapFill || hasShaderFill))
 					{
+						hasDrawnFilledShape = true;
 						data.skip(type);
 					}
 					else
@@ -590,10 +601,20 @@ class Context3DGraphics
 						return false;
 					}
 
+				case LINE_STYLE:
+					var c = data.readLineStyle();
+					if (c.thickness != null)
+					{
+						data.destroy();
+						return false;
+					}
+					data.skip(type);
+
 				case END_FILL:
 					hasBitmapFill = false;
 					hasColorFill = false;
 					hasShaderFill = false;
+					hasDrawnFilledShape = false;
 					data.skip(type);
 
 				case MOVE_TO:
@@ -681,7 +702,9 @@ class Context3DGraphics
 				}
 
 				var scale9Grid:Rectangle = graphics.__owner.__scale9Grid;
-				var hasScale9Grid = scale9Grid != null && !graphics.__owner.__isMask && graphics.__worldTransform.b == 0 && graphics.__worldTransform.c == 0;
+				// no scale9Grid for masks
+				// no scale9Grid for rotation 0.02 degrees or higher (less than 0.02 is allowed in flash)
+				var hasScale9Grid = scale9Grid != null && !graphics.__owner.__isMask && Math.abs(graphics.__owner.__rotation) < 0.02;
 				if (!hasScale9Grid)
 				{
 					scale9Grid = null;

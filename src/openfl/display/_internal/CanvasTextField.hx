@@ -312,9 +312,9 @@ class CanvasTextField
 
 								if (start != null && end != null)
 								{
-									context.fillStyle = "#000000";
+									context.fillStyle = "#" + StringTools.hex(textField.selectionHighlightColor & 0xFFFFFF, 6);
 									context.fillRect(start.x + scrollX - bounds.x, start.y + scrollY, end.x - start.x, group.height);
-									context.fillStyle = "#FFFFFF";
+									context.fillStyle = "#" + StringTools.hex(textField.selectionTextColor & 0xFFFFFF, 6);
 
 									// TODO: fill only once
 
@@ -423,6 +423,7 @@ class CanvasTextField
 				graphics.__bitmapScaleX = pixelRatio;
 				graphics.__bitmapScaleY = pixelRatio;
 				graphics.__visible = true;
+				graphics.__managed = true;
 				textField.__dirty = false;
 				graphics.__softwareDirty = false;
 				graphics.__dirty = false;

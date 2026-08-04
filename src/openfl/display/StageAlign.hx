@@ -48,16 +48,42 @@ enum abstract StageAlign(Null<Int>)
 
 	@:from private static function fromString(value:String):StageAlign
 	{
+		if (value == null)
+		{
+			return null;
+		}
+		// interestingly, Flash accepts string values that are not defined on
+		// the StageAlign class.
+		var upperCaseValue = value.toUpperCase();
+		var value = "";
+		if (upperCaseValue.indexOf("T") != -1)
+		{
+			value += "T";
+		}
+		else if (upperCaseValue.indexOf("B") != -1)
+		{
+			// if a string contains both T and B, T takes precedence
+			value += "B";
+		}
+		if (upperCaseValue.indexOf("L") != -1)
+		{
+			value += "L";
+		}
+		else if (upperCaseValue.indexOf("R") != -1)
+		{
+			// if a string contains both L and R, R takes precedence
+			value += "R";
+		}
 		return switch (value)
 		{
-			case "bottom": BOTTOM;
-			case "bottomLeft": BOTTOM_LEFT;
-			case "bottomRight": BOTTOM_RIGHT;
-			case "left": LEFT;
-			case "right": RIGHT;
-			case "top": TOP;
-			case "topLeft": TOP_LEFT;
-			case "topRight": TOP_RIGHT;
+			case "B": BOTTOM;
+			case "BL": BOTTOM_LEFT;
+			case "BR": BOTTOM_RIGHT;
+			case "L": LEFT;
+			case "R": RIGHT;
+			case "T": TOP;
+			case "TL": TOP_LEFT;
+			case "TR": TOP_RIGHT;
 			default: null;
 		}
 	}
@@ -66,14 +92,14 @@ enum abstract StageAlign(Null<Int>)
 	{
 		return switch (cast this : StageAlign)
 		{
-			case StageAlign.BOTTOM: "bottom";
-			case StageAlign.BOTTOM_LEFT: "bottomLeft";
-			case StageAlign.BOTTOM_RIGHT: "bottomRight";
-			case StageAlign.LEFT: "left";
-			case StageAlign.RIGHT: "right";
-			case StageAlign.TOP: "top";
-			case StageAlign.TOP_LEFT: "topLeft";
-			case StageAlign.TOP_RIGHT: "topRight";
+			case StageAlign.BOTTOM: "B";
+			case StageAlign.BOTTOM_LEFT: "BL";
+			case StageAlign.BOTTOM_RIGHT: "BR";
+			case StageAlign.LEFT: "L";
+			case StageAlign.RIGHT: "R";
+			case StageAlign.TOP: "T";
+			case StageAlign.TOP_LEFT: "TL";
+			case StageAlign.TOP_RIGHT: "TR";
 			default: null;
 		}
 	}

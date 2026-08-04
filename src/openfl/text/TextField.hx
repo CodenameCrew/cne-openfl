@@ -622,6 +622,28 @@ class TextField extends InteractiveObject
 	public var textColor(get, set):Int;
 
 	/**
+		The color of the text within the selection range in a text field, in
+		hexadecimal format. The hexadecimal color system uses six digits to
+		represent color values. Each digit has 16 possible values or characters.
+		The characters range from 0-9 and then A-F. For example, black is
+		`0x000000`; white is `0xFFFFFF`.
+
+		@default 0xffffff
+	**/
+	public var selectionTextColor(get, set):Int;
+
+	/**
+		The color of the highlight that appears around the text within the
+		selection range in a text field, in hexadecimal format. The hexadecimal
+		color system uses six digits to represent color values. Each digit has
+		16 possible values or characters. The characters range from 0-9 and then
+		A-F. For example, black is `0x000000`; white is `0xFFFFFF`.
+
+		@default 0(0x000000)
+	**/
+	public var selectionHighlightColor(get, set):Int;
+
+	/**
 		The height of the text in pixels.
 	**/
 	public var textHeight(get, never):Float;
@@ -3102,6 +3124,42 @@ class TextField extends InteractiveObject
 		return __textFormat.color = value;
 	}
 
+	@:noCompletion private var __selectionHighlightColor:Int = 0x000000;
+
+	@:noCompletion private function get_selectionHighlightColor():Int
+	{
+		return __selectionHighlightColor;
+	}
+
+	@:noCompletion private function set_selectionHighlightColor(value:Int):Int
+	{
+		if (value != __selectionHighlightColor)
+		{
+			__dirty = true;
+			__setRenderDirty();
+		}
+
+		return __selectionHighlightColor = value;
+	}
+
+	@:noCompletion private var __selectionTextColor:Int = 0xffffff;
+
+	@:noCompletion private function get_selectionTextColor():Int
+	{
+		return __selectionTextColor;
+	}
+
+	@:noCompletion private function set_selectionTextColor(value:Int):Int
+	{
+		if (value != __selectionTextColor)
+		{
+			__dirty = true;
+			__setRenderDirty();
+		}
+
+		return __selectionTextColor = value;
+	}
+
 	@:noCompletion private function get_textWidth():Float
 	{
 		__updateLayout();
@@ -3302,7 +3360,7 @@ class TextField extends InteractiveObject
 
 		stage.removeEventListener(Event.ENTER_FRAME, this_onEnterFrame);
 		stage.removeEventListener(MouseEvent.MOUSE_MOVE, stage_onMouseMove);
-		stage.removeEventListener(MouseEvent.MOUSE_UP, stage_onMouseUp);
+		stage.removeEventListener(MouseEvent.MOUSE_UP, stage_onMouseUp, true);
 
 		if (this.stage != stage) return;
 
@@ -3449,7 +3507,11 @@ class TextField extends InteractiveObject
 		stage.addEventListener(Event.ENTER_FRAME, this_onEnterFrame);
 		#end
 		stage.addEventListener(MouseEvent.MOUSE_MOVE, stage_onMouseMove);
-		stage.addEventListener(MouseEvent.MOUSE_UP, stage_onMouseUp);
+		// use capture phase so that other mouseUp listeners may call
+		// stopImmediatePropagation() without affecting this listener.
+		// prevents an issue where the selection continues to follow mouseMove
+		// events after mouseUp.
+		stage.addEventListener(MouseEvent.MOUSE_UP, stage_onMouseUp, true);
 	}
 
 	@:noCompletion private function this_onMouseWheel(event:MouseEvent):Void
@@ -3464,7 +3526,15 @@ class TextField extends InteractiveObject
 	@:noCompletion private function window_onKeyDown(key:KeyCode, modifier:KeyModifier):Void
 	{
 		inline function isModifierPressed()
-			return #if mac modifier.metaKey #elseif js(modifier.metaKey || modifier.ctrlKey) #else (modifier.ctrlKey && !modifier.altKey) #end;
+		{
+			#if (mac || ios || tvos)
+			return modifier.metaKey;
+			#elseif js
+			return modifier.metaKey || modifier.ctrlKey;
+			#else
+			return modifier.ctrlKey && !modifier.altKey;
+			#end
+		}
 
 		switch (key)
 		{
@@ -3705,17 +3775,18 @@ class TextField extends InteractiveObject
 			#if !js
 			case V:
 				#if lime
-				if (#if mac modifier.metaKey #else modifier.ctrlKey && !modifier.altKey #end)
+				if (isModifierPressed())
 				{
-					if (Clipboard.text != null)
+					var clipboardText = Clipboard.text;
+					if (clipboardText != null)
 					{
-						var te = new TextEvent(TextEvent.TEXT_INPUT, true, true, Clipboard.text);
+						var te = new TextEvent(TextEvent.TEXT_INPUT, true, true, clipboardText);
 
 						dispatchEvent(te);
 
 						if (!te.isDefaultPrevented())
 						{
-							__replaceSelectedText(Clipboard.text, true);
+							__replaceSelectedText(clipboardText, true);
 
 							#if openfl_pool_events
 							var changeEvent = Event.__pool.get();
