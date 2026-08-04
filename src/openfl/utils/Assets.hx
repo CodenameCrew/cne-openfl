@@ -10,6 +10,7 @@ import openfl.media.Sound;
 import openfl.text.Font;
 #if lime
 import lime.app.Promise;
+import lime.media.AudioBuffer;
 import lime.utils.AssetLibrary as LimeAssetLibrary;
 import lime.utils.Assets as LimeAssets;
 #end
@@ -272,7 +273,6 @@ class Assets
 		if (limeFont != null)
 		{
 			var font = new Font();
-
 			font.__fromLimeFont(limeFont);
 
 			if (useCache && cache.enabled)
@@ -466,7 +466,6 @@ class Assets
 		if (libraryBindings.exists(className))
 		{
 			var library = libraryBindings.get(className);
-
 			if (instance == null)
 			{
 				Sprite.__constructor = function(instance:Sprite)
@@ -539,7 +538,7 @@ class Assets
 
 	@:noCompletion private static function isValidSound(sound:Sound):Bool
 	{
-		#if ((tools && !display) && (cpp || nodejs))
+		#if ((tools && !display) && (cpp || neko || nodejs))
 		return true;
 		// return (sound.__handle != null && sound.__handle != 0);
 		#else
@@ -717,7 +716,6 @@ class Assets
 			.onComplete(function(limeFont)
 			{
 				var font = new Font();
-
 				font.__fromLimeFont(limeFont);
 
 				if (useCache && cache.enabled)
@@ -997,7 +995,9 @@ class Assets
 
 	@:noCompletion private static function resolveEnum(name:String):Enum<Dynamic>
 	{
-		return Type.resolveEnum(name);
+		var value = Type.resolveEnum(name);
+
+		return value;
 	}
 
 	public static function unloadLibrary(name:String):Void
