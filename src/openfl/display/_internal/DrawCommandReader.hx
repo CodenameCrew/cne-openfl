@@ -46,18 +46,19 @@ class DrawCommandReader
 		switch (prev)
 		{
 			case BEGIN_BITMAP_FILL:
-				oPos += 7; // bitmap, matrix (6 float values)
+				oPos += 1; // bitmap
 				bPos += 2; // repeat, smooth
+				fPos += 6; // matrix (6 float values)
 
 			case BEGIN_FILL:
 				iPos += 1; // color
 				fPos += 1; // alpha
 
 			case BEGIN_GRADIENT_FILL:
-				oPos += 9; // type, matrix (6 float values), spreadMethod, interpolationMethod
+				oPos += 3; // type, spreadMethod, interpolationMethod
 				iiPos += 2; // colors, ratios
 				ffPos += 1; // alphas
-				fPos += 1; // focalPointRatio
+				fPos += 7; // matrix (6 float values), focalPointRatio
 
 			case BEGIN_SHADER_FILL:
 				oPos += 1; // shaderBuffer
@@ -91,14 +92,15 @@ class DrawCommandReader
 				// no parameters
 
 			case LINE_BITMAP_STYLE:
-				oPos += 7; // bitmap, matrix (6 float values)
+				oPos += 1; // bitmap
 				bPos += 2; // repeat, smooth
+				fPos += 6; // matrix (6 float values)
 
 			case LINE_GRADIENT_STYLE:
-				oPos += 9; // type, matrix (6 float values), spreadMethod, interpolationMethod
+				oPos += 3; // type, spreadMethod, interpolationMethod
 				iiPos += 2; // colors, ratios
 				ffPos += 1; // alphas
-				fPos += 1; // focalPointRatio
+				fPos += 7; // matrix (6 float values), focalPointRatio
 
 			case LINE_STYLE:
 				oPos += 4; // thickness, scaleMode, caps, joints
@@ -116,7 +118,7 @@ class DrawCommandReader
 				oPos += 1; // blendMode
 
 			case OVERRIDE_MATRIX:
-				oPos += 6; // matrix (6 float values)
+				fPos += 6; // matrix (6 float values)
 
 			case OVERRIDE_DEPTH_TEST:
 				bPos += 1; // depthTest
@@ -359,17 +361,7 @@ abstract BeginBitmapFillView(DrawCommandReader)
 
 	private inline function get_matrix():Matrix
 	{
-		var a:Null<Float> = cast this.obj(1);
-		if (a == null)
-		{
-			return null;
-		}
-		var b:Float = cast this.obj(2);
-		var c:Float = cast this.obj(3);
-		var d:Float = cast this.obj(4);
-		var tx:Float = cast this.obj(5);
-		var ty:Float = cast this.obj(6);
-		DrawCommandReader.__tempMatrix.setTo(a, b, c, d, tx, ty);
+		DrawCommandReader.__tempMatrix.setTo(this.float(0), this.float(1), this.float(2), this.float(3), this.float(4), this.float(5));
 		return DrawCommandReader.__tempMatrix;
 	}
 
@@ -449,17 +441,7 @@ abstract BeginGradientFillView(DrawCommandReader)
 
 	private inline function get_matrix():Matrix
 	{
-		var a:Null<Float> = cast this.obj(1);
-		if (a == null)
-		{
-			return null;
-		}
-		var b:Float = cast this.obj(2);
-		var c:Float = cast this.obj(3);
-		var d:Float = cast this.obj(4);
-		var tx:Float = cast this.obj(5);
-		var ty:Float = cast this.obj(6);
-		DrawCommandReader.__tempMatrix.setTo(a, b, c, d, tx, ty);
+		DrawCommandReader.__tempMatrix.setTo(this.float(0), this.float(1), this.float(2), this.float(3), this.float(4), this.float(5));
 		return DrawCommandReader.__tempMatrix;
 	}
 
@@ -467,21 +449,21 @@ abstract BeginGradientFillView(DrawCommandReader)
 
 	private inline function get_spreadMethod():SpreadMethod
 	{
-		return cast this.obj(7);
+		return cast this.obj(1);
 	}
 
 	public var interpolationMethod(get, never):InterpolationMethod;
 
 	private inline function get_interpolationMethod():InterpolationMethod
 	{
-		return cast this.obj(8);
+		return cast this.obj(2);
 	}
 
 	public var focalPointRatio(get, never):Float;
 
 	private inline function get_focalPointRatio():Float
 	{
-		return cast this.float(0);
+		return cast this.float(6);
 	}
 }
 
@@ -828,17 +810,7 @@ abstract LineBitmapStyleView(DrawCommandReader)
 
 	private inline function get_matrix():Matrix
 	{
-		var a:Null<Float> = cast this.obj(1);
-		if (a == null)
-		{
-			return null;
-		}
-		var b:Float = cast this.obj(2);
-		var c:Float = cast this.obj(3);
-		var d:Float = cast this.obj(4);
-		var tx:Float = cast this.obj(5);
-		var ty:Float = cast this.obj(6);
-		DrawCommandReader.__tempMatrix.setTo(a, b, c, d, tx, ty);
+		DrawCommandReader.__tempMatrix.setTo(this.float(0), this.float(1), this.float(2), this.float(3), this.float(4), this.float(5));
 		return DrawCommandReader.__tempMatrix;
 	}
 
@@ -896,17 +868,7 @@ abstract LineGradientStyleView(DrawCommandReader)
 
 	private inline function get_matrix():Matrix
 	{
-		var a:Null<Float> = cast this.obj(1);
-		if (a == null)
-		{
-			return null;
-		}
-		var b:Float = cast this.obj(2);
-		var c:Float = cast this.obj(3);
-		var d:Float = cast this.obj(4);
-		var tx:Float = cast this.obj(5);
-		var ty:Float = cast this.obj(6);
-		DrawCommandReader.__tempMatrix.setTo(a, b, c, d, tx, ty);
+		DrawCommandReader.__tempMatrix.setTo(this.float(0), this.float(1), this.float(2), this.float(3), this.float(4), this.float(5));
 		return DrawCommandReader.__tempMatrix;
 	}
 
@@ -914,21 +876,21 @@ abstract LineGradientStyleView(DrawCommandReader)
 
 	private inline function get_spreadMethod():SpreadMethod
 	{
-		return cast this.obj(7);
+		return cast this.obj(1);
 	}
 
 	public var interpolationMethod(get, never):InterpolationMethod;
 
 	private inline function get_interpolationMethod():InterpolationMethod
 	{
-		return cast this.obj(8);
+		return cast this.obj(2);
 	}
 
 	public var focalPointRatio(get, never):Float;
 
 	private inline function get_focalPointRatio():Float
 	{
-		return cast this.float(0);
+		return cast this.float(6);
 	}
 }
 
@@ -1066,17 +1028,7 @@ abstract OverrideMatrixView(DrawCommandReader)
 
 	private inline function get_matrix():Matrix
 	{
-		var a:Null<Float> = cast this.obj(0);
-		if (a == null)
-		{
-			return null;
-		}
-		var b:Float = cast this.obj(1);
-		var c:Float = cast this.obj(2);
-		var d:Float = cast this.obj(3);
-		var tx:Float = cast this.obj(4);
-		var ty:Float = cast this.obj(5);
-		DrawCommandReader.__tempMatrix.setTo(a, b, c, d, tx, ty);
+		DrawCommandReader.__tempMatrix.setTo(this.float(0), this.float(1), this.float(2), this.float(3), this.float(4), this.float(5));
 		return DrawCommandReader.__tempMatrix;
 	}
 }

@@ -175,21 +175,21 @@ class DrawCommandBuffer
 		o.push(bitmap);
 		if (matrix != null)
 		{
-			o.push(matrix.a);
-			o.push(matrix.b);
-			o.push(matrix.c);
-			o.push(matrix.d);
-			o.push(matrix.tx);
-			o.push(matrix.ty);
+			f.push(matrix.a);
+			f.push(matrix.b);
+			f.push(matrix.c);
+			f.push(matrix.d);
+			f.push(matrix.tx);
+			f.push(matrix.ty);
 		}
 		else
 		{
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
+			f.push(1.0);
+			f.push(0.0);
+			f.push(0.0);
+			f.push(1.0);
+			f.push(0.0);
+			f.push(0.0);
 		}
 		b.push(repeat);
 		b.push(smooth);
@@ -216,21 +216,21 @@ class DrawCommandBuffer
 		ii.push(ratios);
 		if (matrix != null)
 		{
-			o.push(matrix.a);
-			o.push(matrix.b);
-			o.push(matrix.c);
-			o.push(matrix.d);
-			o.push(matrix.tx);
-			o.push(matrix.ty);
+			f.push(matrix.a);
+			f.push(matrix.b);
+			f.push(matrix.c);
+			f.push(matrix.d);
+			f.push(matrix.tx);
+			f.push(matrix.ty);
 		}
 		else
 		{
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
+			f.push(1.0);
+			f.push(0.0);
+			f.push(0.0);
+			f.push(1.0);
+			f.push(0.0);
+			f.push(0.0);
 		}
 		o.push(spreadMethod);
 		o.push(interpolationMethod);
@@ -350,21 +350,21 @@ class DrawCommandBuffer
 		o.push(bitmap);
 		if (matrix != null)
 		{
-			o.push(matrix.a);
-			o.push(matrix.b);
-			o.push(matrix.c);
-			o.push(matrix.d);
-			o.push(matrix.tx);
-			o.push(matrix.ty);
+			f.push(matrix.a);
+			f.push(matrix.b);
+			f.push(matrix.c);
+			f.push(matrix.d);
+			f.push(matrix.tx);
+			f.push(matrix.ty);
 		}
 		else
 		{
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
+			f.push(1.0);
+			f.push(0.0);
+			f.push(0.0);
+			f.push(1.0);
+			f.push(0.0);
+			f.push(0.0);
 		}
 		b.push(repeat);
 		b.push(smooth);
@@ -382,21 +382,21 @@ class DrawCommandBuffer
 		ii.push(ratios);
 		if (matrix != null)
 		{
-			o.push(matrix.a);
-			o.push(matrix.b);
-			o.push(matrix.c);
-			o.push(matrix.d);
-			o.push(matrix.tx);
-			o.push(matrix.ty);
+			f.push(matrix.a);
+			f.push(matrix.b);
+			f.push(matrix.c);
+			f.push(matrix.d);
+			f.push(matrix.tx);
+			f.push(matrix.ty);
 		}
 		else
 		{
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
+			f.push(1.0);
+			f.push(0.0);
+			f.push(0.0);
+			f.push(1.0);
+			f.push(0.0);
+			f.push(0.0);
 		}
 		o.push(spreadMethod);
 		o.push(interpolationMethod);
@@ -452,21 +452,21 @@ class DrawCommandBuffer
 		types.push(OVERRIDE_MATRIX);
 		if (matrix != null)
 		{
-			o.push(matrix.a);
-			o.push(matrix.b);
-			o.push(matrix.c);
-			o.push(matrix.d);
-			o.push(matrix.tx);
-			o.push(matrix.ty);
+			f.push(matrix.a);
+			f.push(matrix.b);
+			f.push(matrix.c);
+			f.push(matrix.d);
+			f.push(matrix.tx);
+			f.push(matrix.ty);
 		}
 		else
 		{
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
-			o.push(null);
+			f.push(1.0);
+			f.push(0.0);
+			f.push(0.0);
+			f.push(1.0);
+			f.push(0.0);
+			f.push(0.0);
 		}
 	}
 
