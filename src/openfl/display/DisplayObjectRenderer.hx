@@ -223,7 +223,7 @@ class DisplayObjectRenderer extends EventDispatcher
 				force = (bitmap.__bitmapData.image != null && bitmap.__bitmapData.image.version != bitmap.__imageVersion)
 					|| (bitmap.__bitmapData.__texture != null
 						&& !bitmap.__bitmapData.readable
-						&& bitmap.bitmapData.__textureVersion != bitmap.__imageVersion);
+						&& bitmap.__bitmapData.__textureVersion != bitmap.__imageVersion);
 
 			case TEXT_FIELD:
 				var textField:TextField = cast displayObject;
