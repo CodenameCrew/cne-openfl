@@ -436,7 +436,7 @@ class GLSLSourceAssembler
 			// In 300, 310, 320, 330; it is required to include this extension.
 			if (!extensions.exists("GL_ARB_separate_shader_objects") && !extensions.exists("GL_EXT_separate_shader_objects"))
 			{
-			    if (versionProfile == "es") extensions.set("GL_EXT_separate_shader_objects", "require");
+				if (versionProfile == "es") extensions.set("GL_EXT_separate_shader_objects", "require");
 				else extensions.set("GL_ARB_separate_shader_objects", "require");
 			}
 		}
