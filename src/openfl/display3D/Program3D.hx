@@ -70,21 +70,19 @@ import lime.utils.BytePointer;
 			__agalAlphaSamplerUniforms = new List<Uniform>();
 			__agalAlphaSamplerEnabled = new Array<Uniform>();
 		}
-		else
-		{
-			__glslSamplerLocations = new Array();
-			__glslSamplerDefaults = new Array();
-			__glslSamplerNames = new Array();
-			__glslAttribLocations = new Array();
-			__glslAttribNames = new Array();
-			__glslAttribTypes = new Array();
-			__glslAttribSizes = new Array();
-			__glslUniformLocations = new Array();
-			__glslUniformDefaults = new Array();
-			__glslUniformNames = new Array();
-			__glslUniformTypes = new Array();
-			__glslUniformSizes = new Array();
-		}
+		// these need to be created regardless, since AGAL shaders are converted into GLSL
+		__glslSamplerLocations = new Array();
+		__glslSamplerDefaults = new Array();
+		__glslSamplerNames = new Array();
+		__glslAttribLocations = new Array();
+		__glslAttribNames = new Array();
+		__glslAttribTypes = new Array();
+		__glslAttribSizes = new Array();
+		__glslUniformLocations = new Array();
+		__glslUniformDefaults = new Array();
+		__glslUniformNames = new Array();
+		__glslUniformTypes = new Array();
+		__glslUniformSizes = new Array();
 
 		__samplerStates = new Array<SamplerState>();
 	}
@@ -720,7 +718,7 @@ import lime.utils.BytePointer;
 
 	/**
 	 * Searches for strings that have only whitespace.
-	 * 
+	 *
 	 * **Note:** Searching for all whitespace via `~/^\s*$/` caused false-negatives,
 	 * notably: `String.fromCharCode(0)` is `false` but `\W` is `true`.
 	 */
