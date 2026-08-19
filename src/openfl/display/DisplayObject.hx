@@ -2032,15 +2032,14 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable
 			}
 
 			__filters = clonedFilters;
-			// __updateFilters = true;
-			__setRenderDirty();
 		}
 		else if (__filters != null)
 		{
 			__filters = null;
-			// __updateFilters = false;
-			__setRenderDirty();
 		}
+
+		// __updateFilters = false;
+		__setRenderDirty();
 
 		return value;
 	}
