@@ -19,7 +19,8 @@ class GLSLSourceAssembler
 		#if web
 		return "100";
 		#elseif mac
-		return "410";
+		// Maybe fix later to use Core profile instead?
+		return "120";
 		#elseif android
 		return "320 es";
 		#else
