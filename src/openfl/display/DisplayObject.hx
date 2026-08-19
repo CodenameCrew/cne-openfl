@@ -2007,36 +2007,13 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable
 
 	@:noCompletion private function get_filters():Array<BitmapFilter>
 	{
-		if (__filters == null)
-		{
-			return new Array();
-		}
-		else
-		{
-			return __filters.copy();
-		}
+		if (__filters == null) __filters = [];
+		return __filters;
 	}
 
 	@:noCompletion private function set_filters(value:Array<BitmapFilter>):Array<BitmapFilter>
 	{
-		if (value != null && value.length > 0)
-		{
-			var clonedFilters:Array<BitmapFilter> = [];
-
-			for (filter in value)
-			{
-				var clonedFilter:BitmapFilter = filter.clone();
-
-				clonedFilter.__renderDirty = true;
-				clonedFilters.push(clonedFilter);
-			}
-
-			__filters = clonedFilters;
-		}
-		else if (__filters != null)
-		{
-			__filters = null;
-		}
+		__filters = value;
 
 		// __updateFilters = false;
 		__setRenderDirty();
