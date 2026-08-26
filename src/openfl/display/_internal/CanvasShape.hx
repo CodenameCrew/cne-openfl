@@ -52,7 +52,7 @@ class CanvasShape
 
 					renderer.setTransform(renderTransform, context);
 
-					context.drawImage(canvas, 0, 0, width, height);
+					context.drawImage(canvas, 0, 0);
 
 					Matrix.__pool.release(renderTransform);
 
@@ -89,6 +89,13 @@ class CanvasShape
 				var context = renderer.context;
 				var scrollRect = shape.__scrollRect;
 				var scale9Grid = shape.__worldScale9Grid;
+				// no scale9Grid for masks
+				// no scale9Grid for rotation 0.02 degrees or higher (less than 0.02 is allowed in flash)
+				var hasScale9Grid = scale9Grid != null && !shape.__isMask && Math.abs(shape.__rotation) < 0.02;
+				if (!hasScale9Grid)
+				{
+					scale9Grid = null;
+				}
 
 				// TODO: Render for scroll rect?
 
@@ -99,7 +106,7 @@ class CanvasShape
 
 					context.globalAlpha = alpha;
 
-					if (scale9Grid != null && transform.b == 0 && transform.c == 0)
+					if (hasScale9Grid)
 					{
 						#if (openfl_disable_hdpi || openfl_disable_hdpi_graphics)
 						var pixelRatio = 1;

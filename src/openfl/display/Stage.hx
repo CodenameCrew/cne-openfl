@@ -901,6 +901,7 @@ class Stage extends DisplayObjectContainer implements IModule
 		}
 
 		this.stage = this;
+		__root = this;
 
 		align = StageAlign.TOP_LEFT;
 		allowsFullScreen = true;
@@ -911,7 +912,7 @@ class Stage extends DisplayObjectContainer implements IModule
 		softKeyboardRect = new Rectangle();
 		stageFocusRect = true;
 
-		#if mac
+		#if (mac || ios || tvos)
 		__macKeyboard = true;
 		#elseif (js && html5)
 		__macKeyboard = untyped js.Syntax.code("/AppleWebKit/.test (navigator.userAgent) && /Mobile\\/\\w+/.test (navigator.userAgent) || /Mac/.test (navigator.platform)");
@@ -1014,7 +1015,7 @@ class Stage extends DisplayObjectContainer implements IModule
 
 		if (Lib.current.stage == null)
 		{
-			stage.addChild(Lib.current);
+			stage.__addChild(Lib.current);
 		}
 
 		#if commonjs
@@ -1022,7 +1023,7 @@ class Stage extends DisplayObjectContainer implements IModule
 		{
 			DisplayObject.__initStage = this;
 			var sprite:Sprite = cast Type.createInstance(documentClass, []);
-			// addChild (sprite); // done by init stage
+			// __addChild (sprite); // done by init stage
 			sprite.dispatchEvent(new Event(Event.ADDED_TO_STAGE, false, false));
 		}
 
@@ -1031,6 +1032,9 @@ class Stage extends DisplayObjectContainer implements IModule
 			app.addModule(this);
 			app.exec();
 		}
+
+		Lib.current.__loaderInfo.dispatchEvent(new openfl.events.Event(openfl.events.Event.INIT));
+		Lib.current.__loaderInfo.dispatchEvent(new openfl.events.Event(openfl.events.Event.COMPLETE));
 		#end
 	}
 
@@ -1160,7 +1164,9 @@ class Stage extends DisplayObjectContainer implements IModule
 				#if openfl_dpi_aware
 				context3D.configureBackBuffer(windowWidth, windowHeight, 0, true, true, true);
 				#else
-				context3D.configureBackBuffer(stageWidth, stageHeight, 0, true, true, true);
+				var unscaledWindowWidth = Std.int(window.width);
+				var unscaledWindowHeight = Std.int(window.height);
+				context3D.configureBackBuffer(unscaledWindowWidth, unscaledWindowHeight, 0, true, true, true);
 				#end
 				context3D.present();
 				__renderer = new OpenGLRenderer(context3D);
@@ -1271,13 +1277,23 @@ class Stage extends DisplayObjectContainer implements IModule
 					event.eventPhase = EventPhase.CAPTURING_PHASE;
 					event.target = stack[stack.length - 1];
 
-					for (i in 0...length - 1)
+					if (event.target == this)
 					{
-						stack[i].__dispatch(event);
-
-						if (event.__isCanceled)
+						// special case: even when the stage is the target, it
+						// dispatches for both CAPTURING_PHASE and AT_TARGET.
+						target = cast event.target;
+						target.__dispatch(event);
+					}
+					else
+					{
+						for (i in 0...length - 1)
 						{
-							return;
+							stack[i].__dispatch(event);
+
+							if (event.__isCanceled)
+							{
+								return;
+							}
 						}
 					}
 
@@ -1620,16 +1636,16 @@ class Stage extends DisplayObjectContainer implements IModule
 								var currentParent = current.parent;
 								if (currentParent != null && currentParent.tabChildren)
 								{
-									var currentIndex = currentParent.getChildIndex(current);
+									var currentIndex = currentParent.__children.indexOf(current);
 									if (currentIndex == -1)
 									{
 										current = currentParent;
 										continue;
 									}
 									var i = currentIndex + nextOffset;
-									while (modifier.shiftKey ? (i >= 0) : (i < currentParent.numChildren))
+									while (modifier.shiftKey ? (i >= 0) : (i < currentParent.__children.length))
 									{
-										var sibling = currentParent.getChildAt(i);
+										var sibling = currentParent.__children[i];
 										if ((sibling is InteractiveObject))
 										{
 											var interactiveSibling = cast(sibling, InteractiveObject);
@@ -3034,7 +3050,7 @@ class Stage extends DisplayObjectContainer implements IModule
 
 			var dropTarget:DisplayObject = null;
 
-			if (__mouseOverTarget == __dragObject)
+			if (__dragObject.contains(__mouseOverTarget))
 			{
 				var cacheMouseEnabled = __dragObject.mouseEnabled;
 				var cacheMouseChildren = __dragObject.mouseChildren;
@@ -3326,6 +3342,13 @@ class Stage extends DisplayObjectContainer implements IModule
 		var visibleY = 0.0;
 		switch (align)
 		{
+			case null:
+				// it is undocumented, but it is possible to align the stage in
+				// Flash to the center both horizontally and vertically by
+				// setting stage.align to an invalid value, such as an empty
+				// string ("")
+				visibleX = Math.round((__logicalWidth - visibleWidth) / 2);
+				visibleY = Math.round((__logicalHeight - visibleHeight) / 2);
 			case BOTTOM_RIGHT:
 				visibleX = Math.round(__logicalWidth - visibleWidth);
 				visibleY = Math.round(__logicalHeight - visibleHeight);
@@ -3433,7 +3456,9 @@ class Stage extends DisplayObjectContainer implements IModule
 			#if openfl_dpi_aware
 			context3D.configureBackBuffer(windowWidth, windowHeight, 0, true, true, true);
 			#else
-			context3D.configureBackBuffer(stageWidth, stageHeight, 0, true, true, true);
+			var unscaledWindowWidth = Std.int(window.width);
+			var unscaledWindowHeight = Std.int(window.height);
+			context3D.configureBackBuffer(unscaledWindowWidth, unscaledWindowHeight, 0, true, true, true);
 			#end
 		}
 

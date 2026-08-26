@@ -61,6 +61,11 @@ import openfl.geom.Rectangle;
 	NativeWindow objects will not be garbage collected after the window
 	constructor has been called and before `close()` has been called. It is the
 	responsibility of the application to close its own windows.
+
+	Important: In OpenFL 9.5.1+, only the main application window supports hardware 
+	acceleration (OpenGL). Additional NativeWindow instances are currently limited 
+	to software rendering (Cairo) to ensure stability. This limitation applies only 
+	to non-AIR targets.
 **/
 @:access(openfl.desktop.NativeApplication)
 @:access(openfl.display.NativeWindowInitOptions)
@@ -172,6 +177,9 @@ class NativeWindow extends EventDispatcher
 		windows are created in an invisible state. To prevent changes to the
 		window from being visible, do not change the window `visible` property
 		to `true` or call `activate()` until the window changes are finished.
+
+		Note: Only the main application window supports hardware acceleration; 
+		additional windows are currently limited to software rendering.
 	**/
 	public function new(initOptions:NativeWindowInitOptions)
 	{

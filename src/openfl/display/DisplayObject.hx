@@ -604,6 +604,8 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable
 	**/
 	public var parent(default, null):DisplayObjectContainer;
 
+	@:noCompletion private var __root:DisplayObject;
+
 	/**
 		For a display object in a loaded SWF file, the `root` property
 		is the top-most display object in the portion of the display list's tree
@@ -1009,8 +1011,9 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable
 		if (__initStage != null)
 		{
 			this.stage = __initStage;
+			__root = this;
 			__initStage = null;
-			this.stage.addChild(this);
+			this.stage.__addChild(this);
 		}
 	}
 
@@ -1345,14 +1348,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable
 	{
 		if (__eventMap != null && hasEventListener(event.type))
 		{
-			var result = super.__dispatchEvent(event);
-
-			if (event.__isCanceled)
-			{
-				return true;
-			}
-
-			return result;
+			return super.__dispatchEvent(event);
 		}
 
 		return true;
@@ -1363,13 +1359,14 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable
 	@:noCompletion private override function __dispatchEvent(event:Event):Bool
 	{
 		var parent = event.bubbles ? this.parent : null;
-		var result = super.__dispatchEvent(event);
+		var atTargetResult = super.__dispatchEvent(event);
 
 		if (event.__isCanceled)
 		{
-			return true;
+			return atTargetResult;
 		}
 
+		var bubblingResult = true;
 		if (parent != null && parent != this)
 		{
 			event.eventPhase = EventPhase.BUBBLING_PHASE;
@@ -1379,10 +1376,10 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable
 				event.target = this;
 			}
 
-			parent.__dispatchEvent(event);
+			bubblingResult = parent.__dispatchEvent(event);
 		}
 
-		return result;
+		return atTargetResult && bubblingResult;
 	}
 
 	@:noCompletion private function __dispatchWithCapture(event:Event):Bool
@@ -1392,13 +1389,14 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable
 			event.target = this;
 		}
 
+		var capturingResult = true;
 		if (parent != null)
 		{
 			event.eventPhase = CAPTURING_PHASE;
 
 			if (parent == stage)
 			{
-				parent.__dispatch(event);
+				capturingResult = parent.__dispatch(event);
 			}
 			else
 			{
@@ -1415,16 +1413,23 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable
 
 				for (j in 0...i)
 				{
-					stack[i - j - 1].__dispatch(event);
+					capturingResult = stack[i - j - 1].__dispatch(event) && capturingResult;
 				}
 
 				__tempStack.release(stack);
+			}
+
+			if (event.__isCanceled)
+			{
+				return capturingResult;
 			}
 		}
 
 		event.eventPhase = AT_TARGET;
 
-		return __dispatchEvent(event);
+		var atTargetResult = __dispatchEvent(event);
+
+		return capturingResult && atTargetResult;
 	}
 
 	@:noCompletion private function __enterFrame(deltaTime:Float):Void {}
@@ -1652,6 +1657,30 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable
 	@:noCompletion private function __setStageReference(stage:Stage):Void
 	{
 		this.stage = stage;
+
+		if (stage != null)
+		{
+			if (Lib.current == this && parent == stage)
+			{
+				__root = this;
+			}
+			else if (parent != null)
+			{
+				__root = parent.__root;
+			}
+			else if (__renderParent != null)
+			{
+				__root = __renderParent.__root;
+			}
+			else
+			{
+				__root = null;
+			}
+		}
+		else
+		{
+			__root = null;
+		}
 	}
 
 	@:noCompletion private function __setTransformDirty():Void
@@ -2062,12 +2091,7 @@ class DisplayObject extends EventDispatcher implements IBitmapDrawable
 
 	@:noCompletion private function get_root():DisplayObject
 	{
-		if (stage != null)
-		{
-			return Lib.current;
-		}
-
-		return null;
+		return __root;
 	}
 
 	@:keep @:noCompletion private function get_rotation():Float

@@ -13,6 +13,8 @@ class CairoBitmapData
 
 		var cairo = renderer.cairo;
 
+		renderer.__setBlendMode(NORMAL);
+
 		renderer.applyMatrix(bitmapData.__renderTransform, cairo);
 
 		var surface = bitmapData.getSurface();
