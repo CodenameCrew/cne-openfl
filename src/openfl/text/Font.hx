@@ -4,6 +4,7 @@ import lime.text.Font as LimeFont;
 import openfl.utils.Assets;
 import openfl.utils.ByteArray;
 import openfl.utils.Future;
+import openfl.text._internal.TextEngine;
 
 /**
 	The Font class is used to manage embedded fonts in SWF files. Embedded
@@ -13,6 +14,7 @@ import openfl.utils.Future;
 	load external fonts, or to create an instance of a Font object by itself.
 	Use the Font class as an abstract base class.
 **/
+@:access(openfl.text._internal.TextEngine)
 class Font extends LimeFont
 {
 	/**

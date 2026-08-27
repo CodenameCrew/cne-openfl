@@ -3594,7 +3594,6 @@ class TextField extends InteractiveObject
 
 			#if !js
 			case V:
-				#if lime
 				if (isModifierPressed())
 				{
 					var clipboardText = Clipboard.text;
