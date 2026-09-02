@@ -705,13 +705,14 @@ class TextEngine
 				lineDescents.push(currentLineDescent);
 				lineLeadings.push(currentLineLeading != null ? currentLineLeading : 0);
 				lineHeights.push(currentLineHeight);
-				lineWidths.push(currentLineWidth);
+				lineWidths.push(currentLineWidthWithWhitespace);
 
 				currentLineAscent = 0;
 				currentLineDescent = 0;
 				currentLineLeading = null;
 				currentLineHeight = 0;
 				currentLineWidth = 0;
+				currentLineWidthWithWhitespace = 0;
 
 				numLines++;
 			}
@@ -812,7 +813,7 @@ class TextEngine
 		lineDescents.push(currentLineDescent);
 		lineLeadings.push(currentLineLeading != null ? currentLineLeading : 0);
 		lineHeights.push(currentLineHeight);
-		lineWidths.push(currentLineWidth);
+		lineWidths.push(currentLineWidthWithWhitespace);
 
 		if (numLines == 1)
 		{
