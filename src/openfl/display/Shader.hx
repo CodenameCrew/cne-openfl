@@ -473,7 +473,7 @@ class Shader
 			__data = cast new ShaderData(null);
 		}
 
-		if (__glFragmentSourceRaw != null && __glVertexSourceRaw != null && (program == null || __glSourceDirty))
+		if (program == null || __glSourceDirty)
 		{
 			__initGL();
 		}
@@ -586,10 +586,10 @@ class Shader
 
 	@:noCompletion private function __refreshGLSource():Void
 	{
-		__glVertexSource = __glSourceAssembler.assembleSource(__glVertexSourceRaw, __glVertexPragmas,
+		__glVertexSource = __glSourceAssembler.assembleSource(__glVertexSourceRaw ?? "", __glVertexPragmas,
 			__glVertexExtensions, __glVersionRaw, true, true, __precisionHint);
 
-		__glFragmentSource = __glSourceAssembler.assembleSource(__glFragmentSourceRaw, __glFragmentPragmas,
+		__glFragmentSource = __glSourceAssembler.assembleSource(__glFragmentSourceRaw ?? "", __glFragmentPragmas,
 			__glFragmentExtensions, __glVersionRaw, false, true, __precisionHint);
 
 		__glVersion = GLSLSourceAssembler.getVersionFromSource(__glFragmentSource,
