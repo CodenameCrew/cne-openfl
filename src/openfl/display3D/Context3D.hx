@@ -33,6 +33,9 @@ import lime.graphics.ImageBuffer;
 import lime.graphics.RenderContext;
 import lime.graphics.WebGLRenderContext;
 import lime.math.Vector2;
+#if mac
+import lime.graphics.opengl.GLVertexArrayObject;
+#end
 #end
 
 /**
@@ -280,6 +283,9 @@ import lime.math.Vector2;
 	@:noCompletion private var __vertexConstants:Float32Array;
 	@:noCompletion private var __usingComplexBlend:Bool;
 	@:noCompletion private var __tempMatrixData:Float32Array;
+	#if (lime && mac)
+	@:noCompletion private var __vao:GLVertexArrayObject;
+	#end
 
 	@:noCompletion private function new(stage:Stage, contextState:Context3DState = null, stage3D:Stage3D = null)
 	{
@@ -401,6 +407,13 @@ import lime.math.Vector2;
 		__quadIndexBufferCount = __quadIndexBufferElements * 6;
 
 		#if lime
+
+		// Band-aid fix for MacOS not displaying anything but black screen
+		#if mac
+		__vao = GL.createVertexArray();
+		GL.bindVertexArray(__vao);
+		#end
+
 		var data = new UInt16Array(__quadIndexBufferCount);
 
 		var index:UInt = 0;
