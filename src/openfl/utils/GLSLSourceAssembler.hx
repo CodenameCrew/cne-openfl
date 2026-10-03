@@ -9,22 +9,28 @@ import openfl.display.ShaderPrecision;
 class GLSLSourceAssembler
 {
 	/**
-		Gets this platform default GLSL version
+		Gets this platform stable GLSL version
 	**/
 	public static function getDefaultVersion():String
 	{
-		// Specify the default glVersion.
-		// We can use compile defines to guess the value that prevents crashes in the majority of cases.
-		//return #if (android) "100" #elseif (web) "100" #elseif (mac) "120" #elseif (desktop) "150" #else "100" #end;
-		#if web
-		return "100";
+		#if (web || mobile)
+		return "300 es";
 		#elseif mac
-		// Maybe fix later to use Core profile instead?
-		return "120";
-		#elseif android
-		return "320 es";
+		return "410 core";
 		#else
 		return "330 core";
+		#end
+	}
+
+	/**
+		Gets this platform default legacy full-compatible GLSL version
+	**/
+	public static function getDefaultLegacyVersion():String
+	{
+		#if (web || mobile || mac)
+		return "100";
+		#else
+		return "120";
 		#end
 	}
 
@@ -41,37 +47,59 @@ class GLSLSourceAssembler
 	}
 
 	/**
+		Corrects the GLSL Version to the compatbile GLSL version in this platform
+	**/
+	public static function getCompatibleVersion(version:Null<String>):String
+	{
+		var dataVersion = __getVersion(version);
+		return __getCompatibleVersion(dataVersion.versionNumber, dataVersion.versionProfile);
+	}
 
+	/**
+		Provides additional `#extension` directives to insert in the fragment shaders.
+		Not recommended for future uses, an left-over from original openfl/openfl
+		feature/shader-improvements branch.
 	**/
 	public var fragmentExtensions:Map<String, String>;
 
 	/**
-
+		Provides an additional pragmas to use in (child class of) fragment shaders.
+		Not recommended for future uses, an left-over from original openfl/openfl
+		feature/shader-improvements branch.
 	**/
 	public var fragmentPragmas:Map<String, String>;
 
 	/**
-
+		Get or set the fragment source used when targeting OpenGL.
+		Not recommended for future uses, an left-over from original openfl/openfl
+		feature/shader-improvements branch.
 	**/
 	public var fragmentSource:String;
 
 	/**
-
+		Not recommended for future uses, an left-over from original openfl/openfl
+		feature/shader-improvements branch.
 	**/
 	public var version:String;
 
 	/**
-
+		Provides additional `#extension` directives to insert in the vertex shaders.
+		Not recommended for future uses, an left-over from original openfl/openfl
+		feature/shader-improvements branch.
 	**/
 	public var vertexExtensions:Map<String, String>;
 
 	/**
-
+		Provides an additional pragmas to use in (child class of) vertex shaders.
+		Not recommended for future uses, an left-over from original openfl/openfl
+		feature/shader-improvements branch.
 	**/
 	public var vertexPragmas:Map<String, String>;
 
 	/**
-
+		Get or set the vertex source used when targeting OpenGL.
+		Not recommended for future uses, an left-over from original openfl/openfl
+		feature/shader-improvements branch.
 	**/
 	public var vertexSource:String;
 
@@ -309,20 +337,19 @@ class GLSLSourceAssembler
 			source = __getPragmaFinder().map(source, (glPragmaFinder:EReg) ->
 			{
 				var pragma = glPragmaFinder.matched(1);
-				return pragmas.exists(pragma) ? '/*pragma $pragma*/\n' + pragmas.get(pragma) + '\n' : 'pragma $pragma';
+				return pragmas.exists(pragma) ? ('/*#pragma $pragma*/\n' + pragmas.get(pragma) + '\n') : '#pragma $pragma';
 			});
 		}
 
-		var data = __getSource(source, version);
-		extensions = __buildExtensions(__getExtensions(source, extensions == null ? new Map() : extensions.copy()),
-			data.versionNumber, data.versionProfile, isVertex);
+		var data = __getSource(source, version, extensions == null ? new Map() : extensions.copy());
+		__buildExtensions(data.extensions, data.versionNumber, data.versionProfile, isVertex);
 
 		if (useCompatibility)
 		{
 			data.source = __applyCompatibility(data.source, data.versionNumber, data.versionProfile, isVertex);
 		}
 
-		return __appendPrefix(data.source, data.versionNumber, data.versionProfile, extensions, isVertex, precisionHint);
+		return __appendPrefix(data.source, data.versionNumber, data.versionProfile, data.extensions, isVertex, precisionHint);
 	}
 
 	private function __applyCompatibility(source:String, versionNumber:Int, versionProfile:Null<String>, isVertex:Bool):String
@@ -338,7 +365,7 @@ class GLSLSourceAssembler
 		var texture2DKeyword:EReg = ~/texture2D/g;
 		var glFragColorKeyword:EReg = ~/gl_FragColor/g;
 
-		if (versionNumber >= 300)
+		if (versionNumber >= 130)
 		{
 			if (isVertex)
 			{
@@ -365,16 +392,25 @@ class GLSLSourceAssembler
 	{
 		if (includedKeys == null) includedKeys = [];
 
+		var includeCommentFinder:EReg = __getIncludeCommentFinder(), lastMatch = 0, position;
+		while (includeCommentFinder.matchSub(source, lastMatch))
+		{
+			includedKeys.set(includeCommentFinder.matched(1), true);
+
+			position = includeCommentFinder.matchedPos();
+			lastMatch = position.pos + position.len;
+		}
+
 		return __getIncludeFinder().map(source, (regex:EReg) ->
 		{
 			var key = regex.matched(1);
-			if (includedKeys.get(key)) return '/*Recursive include $key*/\n';
+			if (includedKeys.get(key)) return '/*Recursive include $key*/';
 
 			var include = __getIncludeSource(key, isVertex);
-			if (include == null) return '/*Unknown include $key*/\n';
+			if (include == null) return '/*Unknown include $key*/';
 
 			includedKeys.set(key, true);
-			return '/*include $key*/\n' + __appendIncludes(include, isVertex, includedKeys);
+			return '/*#include $key*/\n' + __appendIncludes(include, isVertex, includedKeys);
 		});
 	}
 
@@ -382,48 +418,60 @@ class GLSLSourceAssembler
 			precisionHint:Null<ShaderPrecision>):String
 	{
 		var output = new StringBuf();
-		output.add('#version $versionNumber${versionProfile != null ? " " + versionProfile : ""}\n');
+		output.add('#version $versionNumber${versionProfile != null ? " " + versionProfile : ""}\n\n');
 
 		if (extensions != null)
 		{
-			for (key in extensions.keys()) output.add('#extension $key : ${extensions[key]}\n');
+			var filled = false;
+			for (key in extensions.keys())
+			{
+				filled = true;
+				output.add('#extension $key : ${extensions[key]}\n');
+			}
+
+			if (filled) output.add('\n');
 		}
 
-		#if (js && html5)
-		if (precisionHint == FAST)
+		#if (web || mobile)
+		if (source == null || !(~/\bprecision\s+(highp|mediump|lowp)\s+float\s*;/g).match(source))
 		{
-			output.add("precision lowp float;\n");
-		}
-		else
-		{
-			output.add("precision mediump float;\n");
-		}
-		#else
-		if (precisionHint == FAST)
-		{
-			output.add("#ifdef GL_ES\nprecision lowp float;\n#endif\n");
-		}
-		else
-		{
-			output.add("#ifdef GL_ES\n#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\n#endif\n");
+			if (precisionHint == FAST)
+			{
+				output.add("#ifdef GL_ES\nprecision lowp float;\n#endif\n\n");
+			}
+			else
+			{
+				output.add("#ifdef GL_ES\n#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\n#endif\n\n");
+			}
 		}
 		#end
 
-		if (OpenGLRenderer.__complexBlendsSupported && !isVertex && versionNumber >= 150)
+		if (OpenGLRenderer.__complexBlendsSupported && !isVertex && versionNumber >= 150 && (source == null || !(~/\blayout\s*\(blend_support_\w+\)\s+out\s*;/g).match(source)))
 		{
 			var behavior = extensions.get("GL_KHR_blend_equation_advanced");
 			if (behavior == "enable" || behavior == "require")
 			{
-				output.add("#ifdef GL_KHR_blend_equation_advanced\nlayout (blend_support_all_equations) out;\n#endif\n");
+				output.add("#ifdef GL_KHR_blend_equation_advanced\nlayout(blend_support_all_equations) out;\n#endif\n\n");
 			}
 		}
 
 		if (source != null)
 		{
-			if (!isVertex && versionNumber >= 300 && versionProfile != "compatibility" && !StringTools.contains(source, "out vec4"))
+			if (!isVertex && (versionNumber >= 130 && versionProfile != "compatibility") && StringTools.contains(source, "openfl_FragColor"))
 			{
-				output.add("out vec4 openfl_FragColor;\n");
+				if (versionNumber >= 300)
+				{
+					if (!(~/\blayout\s*\(location\s*=\s*0\)\s+out\s*;/g).match(source))
+					{
+						output.add("layout(location = 0) out vec4 openfl_FragColor;\n\n");
+					}
+				}
+				else if (!StringTools.contains(source, "out vec4"))
+				{
+					output.add("out vec4 openfl_FragColor;\n\n");
+				}
 			}
+
 			output.add(source);
 		}
 
@@ -437,7 +485,7 @@ class GLSLSourceAssembler
 			// In 300, 310, 320, 330; it is required to include this extension.
 			if (!extensions.exists("GL_ARB_separate_shader_objects") && !extensions.exists("GL_EXT_separate_shader_objects"))
 			{
-				if (versionProfile == "es") extensions.set("GL_EXT_separate_shader_objects", "require");
+				if (__isVersionES(versionNumber, versionProfile)) extensions.set("GL_EXT_separate_shader_objects", "require");
 				else extensions.set("GL_ARB_separate_shader_objects", "require");
 			}
 		}
@@ -452,15 +500,9 @@ class GLSLSourceAssembler
 			if (OpenGLRenderer.__complexBlendsSupported
 				&& !extensions.exists("GL_ARB_sample_shading") && !extensions.exists("GL_OES_sample_shading"))
 			{
-				if (versionProfile == "es") extensions.set("GL_OES_sample_shading", "enable");
+				if (__isVersionES(versionNumber, versionProfile)) extensions.set("GL_OES_sample_shading", "enable");
 				else extensions.set("GL_ARB_sample_shading", "enable");
 			}
-		}
-
-		// Import standard derivative functions.
-		if (OpenGLRenderer.__standardDerivativesSupported && !isVertex)
-		{
-			extensions.set("GL_OES_standard_derivatives", "enable");
 		}
 
 		return extensions;
@@ -471,27 +513,61 @@ class GLSLSourceAssembler
 		return null;
 	}
 
-	private static function __getSource(source:String, defaultVersion:String):{source:String, versionNumber:Int, versionProfile:Null<String>}
+	private static function __getCompatibleVersion(versionNumber:Int, versionProfile:Null<String>):String
 	{
+		var isES = __isVersionES(versionNumber, versionProfile);
+		var compatibleVersion:Int;
+
+		#if (web || mobile)
+		if (isES) compatibleVersion = versionNumber;
+		else if (versionNumber <= 120) compatibleVersion = 100;
+		else if (versionNumber <= 420) compatibleVersion = 300;
+		else if (versionNumber <= 430) compatibleVersion = 310;
+		else compatibleVersion = 320;
+		#elseif mac
+		// CodenameCrew's Lime OpenGL uses 4.1 Core profile
+		if (versionNumber <= 120) compatibleVersion = 100;
+		else if (versionNumber <= 320) compatibleVersion = 150;
+		else compatibleVersion = 410;
+		#else
+		if (!isES) compatibleVersion = versionNumber;
+		else if (versionNumber <= 100) compatibleVersion = 120;
+		else if (versionNumber <= 300) compatibleVersion = 300;
+		else if (versionNumber <= 310) compatibleVersion = 430;
+		else compatibleVersion = 450;
+		#end
+
+		if (isES)
+		{
+			if (compatibleVersion >= 300) return compatibleVersion + " es";
+		}
+		else if (versionProfile != "compatibility" && versionNumber >= 150)
+		{
+			return compatibleVersion + " core";
+		}
+
+		return Std.string(compatibleVersion);
+	}
+
+	private static function __getSource(source:String, defaultVersion:String, extensions:Map<String, String>):{source:String,
+			versionNumber:Int, versionProfile:Null<String>, extensions:Map<String, String>}
+	{
+		var versionNumber:Int, versionProfile:Null<String>;
+
 		var glVersionFinder:EReg = __getVersionFinder();
 		if (glVersionFinder.match(source))
 		{
-			return {
-				source: glVersionFinder.matchedLeft() + glVersionFinder.matchedRight(),
-				versionNumber: Std.parseInt(glVersionFinder.matched(1)),
-				versionProfile: glVersionFinder.matched(2)
-			};
+			source = glVersionFinder.matchedLeft() + glVersionFinder.matchedRight();
+			versionNumber = Std.parseInt(glVersionFinder.matched(1));
+			versionProfile = glVersionFinder.matched(2);
 		}
 		else
 		{
 			var glVersionSeperator:EReg = __getVersionSeperator();
 			if (glVersionSeperator.match(defaultVersion))
 			{
-				return {
-					source: source,
-					versionNumber: Std.parseInt(glVersionSeperator.matched(1)),
-					versionProfile: glVersionSeperator.matched(2)
-				};
+				versionNumber = Std.parseInt(glVersionSeperator.matched(1));
+				versionProfile = glVersionSeperator.matched(2);
 			}
 			else
 			{
@@ -499,22 +575,14 @@ class GLSLSourceAssembler
 				return null;
 			}
 		}
-	}
 
-	private static function __getExtensions(source:String, extensions:Map<String, String>):Map<String, String>
-	{
-		if (extensions == null) extensions = new Map();
-
-		var glExtensionFinder:EReg = __getExtensionFinder(), lastMatch = 0, position;
-		while (glExtensionFinder.matchSub(source, lastMatch))
+		source = __getExtensionFinder().map(source, (regex:EReg) ->
 		{
-			extensions.set(glExtensionFinder.matched(1), glExtensionFinder.matched(2));
+			extensions.set(regex.matched(1), regex.matched(2));
+			return "";
+		});
 
-			position = glExtensionFinder.matchedPos();
-			lastMatch = position.pos + position.len;
-		}
-
-		return extensions;
+		return {source: source, versionNumber: versionNumber, versionProfile: versionProfile, extensions: extensions};
 	}
 
 	private static function __getVersion(version:String):{versionNumber:Int, versionProfile:Null<String>}
@@ -576,6 +644,11 @@ class GLSLSourceAssembler
 		return ~/(?:^|\s)#include\s+(?|"([^"]+)"|'([^']+)'|([^\s]+))/g;
 	}
 
+	private static inline function __getIncludeCommentFinder():EReg
+	{
+		return ~/(?:^|\s)\/\*#include\s+(?|"([^"]+)"|'([^']+)'|([^\s]+))\*\//g;
+	}
+
 	private static inline function __getVersionFinder():EReg
 	{
 		return ~/(?:^|\s)#version\s+(\d+)(?:\s+)?(core|es|compatibility)?\b/;
@@ -584,5 +657,10 @@ class GLSLSourceAssembler
 	private static inline function __getVersionSeperator():EReg
 	{
 		return ~/(\d+)(?:\s+)?(core|es|compatibility)?\b/;
+	}
+
+	private static inline function __isVersionES(versionNumber:Int, ?versionProfile:String):Bool
+	{
+		return versionProfile == "es" || (versionProfile == null && (versionNumber == 100 || versionNumber == 300 || versionNumber == 310 || versionNumber == 320));
 	}
 }
