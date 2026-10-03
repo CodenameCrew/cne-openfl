@@ -362,8 +362,9 @@ class GLSLSourceAssembler
 		var attributeKeyword:EReg = ~/\battribute\s+([A-Za-z0-9_]+)\s+([^\s]+)/gu;
 		var varyingKeyword:EReg = ~/\bvarying\s+(?:lowp\s+|mediump\s+|highp\s+)?([A-Za-z0-9_]+)\s+([^\s]+)/gu;
 
-		var texture2DKeyword:EReg = ~/texture2D/g;
-		var glFragColorKeyword:EReg = ~/gl_FragColor/g;
+		var textureKeyword:EReg = ~/\btexture\b/g;
+		var texture2DKeyword:EReg = ~/\btexture2D\b/g;
+		var glFragColorKeyword:EReg = ~/\bgl_FragColor\b/g;
 
 		if (versionNumber >= 130)
 		{
@@ -377,6 +378,7 @@ class GLSLSourceAssembler
 				source = varyingKeyword.replace(source, "in $1 $2");
 			}
 
+			source = textureKeyword.replace(source, "textureRESERVED");
 			source = texture2DKeyword.replace(source, "texture");
 			source = glFragColorKeyword.replace(source, "openfl_FragColor");
 
@@ -461,12 +463,12 @@ class GLSLSourceAssembler
 			{
 				if (versionNumber >= 300)
 				{
-					if (!(~/\blayout\s*\(location\s*=\s*0\)\s+out\s*;/g).match(source))
+					if (!(~/\blayout\s*\(location\s*=\s*0\)\s*out\s+vec4\s+openfl_FragColor\s*;/g).match(source))
 					{
 						output.add("layout(location = 0) out vec4 openfl_FragColor;\n\n");
 					}
 				}
-				else if (!StringTools.contains(source, "out vec4"))
+				else if (!(~/\bout\s+vec4\s+openfl_FragColor\s*;/g).match(source))
 				{
 					output.add("out vec4 openfl_FragColor;\n\n");
 				}
