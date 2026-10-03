@@ -306,6 +306,12 @@ import lime.graphics.opengl.GLVertexArrayObject;
 		__state = new Context3DState();
 
 		#if lime
+		// Band-aid fix for MacOS not displaying anything but black screen
+		#if mac
+		__vao = GL.createVertexArray();
+		GL.bindVertexArray(__vao);
+		#end
+
 		__vertexConstants = new Float32Array(4 * 128);
 		__fragmentConstants = new Float32Array(4 * 128);
 		__positionScale = new Float32Array([1.0, 1.0, 1.0, 1.0]);
@@ -407,13 +413,6 @@ import lime.graphics.opengl.GLVertexArrayObject;
 		__quadIndexBufferCount = __quadIndexBufferElements * 6;
 
 		#if lime
-
-		// Band-aid fix for MacOS not displaying anything but black screen
-		#if mac
-		__vao = GL.createVertexArray();
-		GL.bindVertexArray(__vao);
-		#end
-
 		var data = new UInt16Array(__quadIndexBufferCount);
 
 		var index:UInt = 0;
