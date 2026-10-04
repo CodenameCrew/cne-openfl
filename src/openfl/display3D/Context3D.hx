@@ -28,6 +28,7 @@ import openfl.utils.AGALMiniAssembler;
 import openfl.utils.ByteArray;
 #if lime
 import lime.graphics.opengl.GL;
+import lime.graphics.opengl.GLVertexArrayObject;
 import lime.graphics.Image;
 import lime.graphics.ImageBuffer;
 import lime.graphics.RenderContext;
@@ -280,6 +281,7 @@ import lime.math.Vector2;
 	@:noCompletion private var __vertexConstants:Float32Array;
 	@:noCompletion private var __usingComplexBlend:Bool;
 	@:noCompletion private var __tempMatrixData:Float32Array;
+	@:noCompletion private var __vao:#if lime GLVertexArrayObject #else Dynamic #end;
 
 	@:noCompletion private function new(stage:Stage, contextState:Context3DState = null, stage3D:Stage3D = null)
 	{
@@ -300,6 +302,10 @@ import lime.math.Vector2;
 		__state = new Context3DState();
 
 		#if lime
+		// Band-aid fix for OpenGL Core profile not displaying anything but black screen
+		__vao = GL.createVertexArray();
+		GL.bindVertexArray(__vao);
+
 		__vertexConstants = new Float32Array(4 * 128);
 		__fragmentConstants = new Float32Array(4 * 128);
 		__positionScale = new Float32Array([1.0, 1.0, 1.0, 1.0]);
