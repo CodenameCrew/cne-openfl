@@ -40,7 +40,9 @@ class ShaderMacro
 		var fieldNames = new Map<String, Bool>();
 
 		for (field in fields) {
+			var isParam = false;
 			for (meta in field.meta) {
+				if (meta.name == "param") isParam = true;
 				switch (name = meta.name.charAt(0) == ":" ? meta.name.substr(1) : meta.name) {
 					case "glFragmentDontOverride": nextFragmentDontOverride = true;
 					case "glVertexDontOverride": nextVertexDontOverride = true;
@@ -78,7 +80,7 @@ class ShaderMacro
 				}
 			}
 
-			fieldNames.set(field.name, true);
+			fieldNames.set(field.name, isParam);
 		}
 
 		var fragmentDontOverride = nextFragmentDontOverride, vertexDontOverride = nextVertexDontOverride;
@@ -90,7 +92,9 @@ class ShaderMacro
 		while (parent != null) {
 			parentFields = [parent.constructor.get()].concat(parent.fields.get());
 			for (field in parentFields) {
+				var isParam = false;
 				for (meta in field.meta.get()) {
+					if (meta.name == "param") isParam = true;
 					switch (name = meta.name.charAt(0) == ":" ? meta.name.substr(1) : meta.name) {
 						case "glFragmentDontOverride": nextFragmentDontOverride = true;
 						case "glVertexDontOverride": nextVertexDontOverride = true;
@@ -128,7 +132,7 @@ class ShaderMacro
 					}
 				}
 
-				fieldNames.set(field.name, true);
+				fieldNames.set(field.name, isParam);
 			}
 
 			fragmentDontOverride = nextFragmentDontOverride;
@@ -177,6 +181,17 @@ class ShaderMacro
 			generateBlock.push(macro __glFragmentExtensions = $v{glFragmentExtensions});
 			if (glVertexSource != null) generateBlock.push(macro __glVertexSourceRaw = $v{glVertexSource});
 			if (glFragmentSource != null) generateBlock.push(macro __glFragmentSourceRaw = $v{glFragmentSource});
+
+			fields.push({
+				name: "__instanceShaderFields",
+				access: [APrivate, AStatic],
+				kind: FVar(macro : Map<String, Bool>, macro $v{fieldNames}),
+				pos: pos,
+				meta: [
+					{name: ":keep", pos: pos},
+					{name: ":noCompletion", pos: pos}
+				]
+			});
 
 			var newBlock:Array<Expr>;
 			for (field in fields) {
@@ -301,13 +316,14 @@ class ShaderMacro
 					{name: ":keep", pos: pos},
 					{name: ":dox", params: [macro hide], pos: pos},
 					{name: ":noCompletion", pos: pos},
-					{name: ":allow", params: [macro openfl.display._internal], pos: pos}
+					{name: ":allow", params: [macro openfl.display._internal], pos: pos},
+					{name: "param", pos: pos}
 				];
 				fieldAccess = APrivate;
 			}
 			else
 			{
-				fieldMeta = [{name: ":keep", pos: pos}];
+				fieldMeta = [{name: ":keep", pos: pos}, {name: "param", pos: pos}];
 				fieldAccess = APublic;
 			}
 

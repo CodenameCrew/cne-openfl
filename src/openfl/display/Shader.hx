@@ -306,7 +306,7 @@ class Shader
 	@:noCompletion private var __colorOffset:ShaderParameter<Float>;
 	@:noCompletion private var __context:Context3D;
 	@:noCompletion private var __data:ShaderData;
-	@:noCompletion private var __fieldList:Array<String>;
+	@:noCompletion private var __fieldMap:Map<String, Bool>;
 	@:noCompletion private var __glVertexExtensions:Map<String, String>;
 	@:noCompletion private var __glFragmentExtensions:Map<String, String>;
 	@:noCompletion private var __glVertexPragmas:Map<String, String>;
@@ -744,7 +744,7 @@ class Shader
 		inline function register(x:Any)
 		{
 			Reflect.setField(__data, name, x);
-			if (__isGenerated && __thisHasField(name))
+			if (__isGenerated && __instanceShaderHasField(name))
 			{
 				try
 				{
@@ -929,14 +929,40 @@ class Shader
 		}
 	}
 
-	@:noCompletion private function __thisHasField(name:String)
+	@:noCompletion private inline function __initializeFieldMap()
 	{
-		// Reflect.hasField(this, name) is REALLY expensive so we cache the result.
-		if (__fieldList == null)
+		#if macro
+		final fields = Reflect.fields(this).concat(Type.getInstanceFields(Type.getClass(this)));
+		__fieldMap = [for (field in fields) field => false];
+		#else
+		if (__fieldMap == null)
 		{
-			__fieldList = Reflect.fields(this).concat(Type.getInstanceFields(Type.getClass(this)));
+			__fieldMap = Reflect.field(Type.getClass(this), "__instanceShaderFields");
+			if (__fieldMap == null)
+			{
+				final fields = Reflect.fields(this).concat(Type.getInstanceFields(Type.getClass(this)));
+				__fieldMap = [for (field in fields) field => false];
+			}
 		}
-		return __fieldList.indexOf(name) != -1;
+		#end
+	}
+
+	@:noCompletion private function __thisHasField(name:String):Bool
+	{
+		__initializeFieldMap();
+		return __fieldMap.exists(name);
+	}
+
+	@:noCompletion private function __instanceHasField(name:String):Bool
+	{
+		__initializeFieldMap();
+		return __fieldMap.get(name) == false;
+	}
+
+	@:noCompletion private function __instanceShaderHasField(name:String):Bool
+	{
+		__initializeFieldMap();
+		return __fieldMap.get(name);
 	}
 
 	@:noCompletion private function __update():Void
