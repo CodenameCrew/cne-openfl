@@ -412,8 +412,8 @@ class TextureBase extends EventDispatcher
 		}
 		else
 		{
-			internalFormat = TextureBase.__textureInternalFormat;
-			format = TextureBase.__textureFormat;
+			internalFormat = __internalFormat;
+			format = __format;
 		}
 
 		__context.__bindGLTexture2D(__textureID);

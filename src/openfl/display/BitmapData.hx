@@ -130,9 +130,6 @@ import openfl.display._internal.stats.DrawCallContext;
 class BitmapData implements IBitmapDrawable
 {
 	@:noCompletion private static inline var VERTEX_BUFFER_STRIDE:Int = 14;
-	@:noCompletion private static var __supportsBGRA:Null<Bool> = null;
-	@:noCompletion private static var __textureFormat:Int;
-	@:noCompletion private static var __textureInternalFormat:Int;
 	#if lime
 	@:noCompletion private static var __tempVector:Vector2 = new Vector2();
 	@:noCompletion private static var __fillRectRectangle:Rectangle = new Rectangle();
@@ -287,7 +284,7 @@ class BitmapData implements IBitmapDrawable
 			#if lime
 			#if sys
 			var buffer = new ImageBuffer(new UInt8Array(width * height * 4), width, height);
-			buffer.format = BGRA32;
+			buffer.format = TextureBase.__supportsBGRA ? BGRA32 : RGBA32;
 			buffer.premultiplied = true;
 
 			image = new Image(buffer, 0, 0, width, height);
@@ -3591,7 +3588,7 @@ class BitmapData implements IBitmapDrawable
 	@:privateAccess
 	{
 		Reflect.setField(__imageAssetCache.buffer, "format", lime.graphics.PixelFormat.RGBA32);
-		lime._internal.graphics.ImageDataUtil.setFormat(__imageAssetCache, BGRA32);
+		if (TextureBase.__supportsBGRA) lime._internal.graphics.ImageDataUtil.setFormat(__imageAssetCache, BGRA32);
 		lime._internal.graphics.ImageDataUtil.multiplyAlpha(__imageAssetCache);
 		Reflect.setField(__imageAssetCache.buffer, "premultiplied", true);
 		__imageAssetCache.__fromImageBuffer(__imageAssetCache.buffer);
@@ -3621,7 +3618,7 @@ class BitmapData implements IBitmapDrawable
 			__resize(image.width, image.height);
 
 			#if sys
-			image.format = BGRA32;
+			image.format = TextureBase.__supportsBGRA ? BGRA32 : RGBA32;
 			image.premultiplied = true;
 			#end
 
