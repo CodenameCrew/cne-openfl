@@ -58,41 +58,8 @@ class TextureBase extends EventDispatcher
 		super();
 
 		__context = context;
-		var gl = __context.gl;
-
-		__textureID = gl.createTexture();
+		__textureID = context.gl.createTexture();
 		__textureContext = __context.__context;
-
-		if (__supportsBGRA == null)
-		{
-			__textureInternalFormat = gl.RGBA;
-
-			var bgraExtension:Dynamic = null;
-			#if (!js || !html5)
-			bgraExtension = gl.getExtension("EXT_bgra");
-			if (bgraExtension == null) bgraExtension = gl.getExtension("EXT_texture_format_BGRA8888");
-			if (bgraExtension == null) bgraExtension = gl.getExtension("APPLE_texture_format_BGRA8888");
-			#end
-
-			if (bgraExtension != null)
-			{
-				__supportsBGRA = true;
-				__textureFormat = bgraExtension.BGRA_EXT;
-
-				// Note: Get rid of this when `ANGLE` is added.
-				#if (lime && !ios)
-				if (context.__context.type == OPENGLES)
-				{
-					__textureInternalFormat = bgraExtension.BGRA_EXT;
-				}
-				#end
-			}
-			else
-			{
-				__supportsBGRA = false;
-				__textureFormat = gl.RGBA;
-			}
-		}
 
 		__internalFormat = __textureInternalFormat;
 		__format = __textureFormat;
