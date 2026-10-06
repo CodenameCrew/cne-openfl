@@ -3519,8 +3519,10 @@ class BitmapData implements IBitmapDrawable
 		{
 			if (lime._internal.backend.native.NativeCFFI.lime_image_load_bytes(bytes, __imageAssetCache.buffer) != null)
 			{
-				var data = __imageAssetCache.buffer.data;
-				for (i in 0...rawAlpha.length) data[i * 4 + 3] = rawAlpha.readUnsignedByte();
+				if (rawAlpha != null) {
+					var data = __imageAssetCache.buffer.data;
+					for (i in 0...rawAlpha.length) data[i * 4 + 3] = rawAlpha.readUnsignedByte();
+				}
 				__fromImageAssetCache(Lib.current.stage.context3D);
 				return true;
 			}
