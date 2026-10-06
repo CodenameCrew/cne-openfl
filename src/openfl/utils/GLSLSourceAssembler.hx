@@ -684,7 +684,7 @@ class GLSLSourceAssembler
 
 	private static inline function __getIncludeFinder():EReg
 	{
-		return ~/#(include|import)\s*(?|"([^"]+)"|'([^']+)')/g;
+		return ~/#(?|include|import)\s*(?|"([^"]+)"|'([^']+)')/g;
 	}
 
 	private static inline function __getVersionFinder():EReg
