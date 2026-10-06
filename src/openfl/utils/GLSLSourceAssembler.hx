@@ -4,6 +4,9 @@ import openfl.utils._internal.Log;
 import openfl.display.OpenGLRenderer;
 import openfl.display.Shader;
 import openfl.display.ShaderPrecision;
+#if lime
+import lime.graphics.opengl.GL;
+#end
 
 @:access(openfl.display.OpenGLRenderer)
 class GLSLSourceAssembler
@@ -11,7 +14,7 @@ class GLSLSourceAssembler
 	/**
 		Gets this platform stable GLSL version
 	**/
-	public static function getDefaultVersion():String
+	public static inline function getDefaultVersion():String
 	{
 		#if (web || mobile)
 		return "300 es";
@@ -25,13 +28,23 @@ class GLSLSourceAssembler
 	/**
 		Gets this platform default legacy full-compatible GLSL version
 	**/
-	public static function getDefaultLegacyVersion():String
+	public static inline function getDefaultLegacyVersion():String
 	{
 		#if (web || mobile || mac)
 		return "100";
 		#else
 		return "120";
 		#end
+	}
+
+	/**
+		Gets the current context GLSL version
+	**/
+	public static function getContextVersion():String
+	{
+		var dataVersion = __getContextVersion();
+		return dataVersion.versionProfile == null ? Std.string(dataVersion.versionNumber) :
+			dataVersion.versionNumber + " " + dataVersion.versionProfile;
 	}
 
 	/**
@@ -54,7 +67,8 @@ class GLSLSourceAssembler
 		var dataVersion = __getVersion(version);
 		__getCompatibleVersion(dataVersion);
 
-		return dataVersion.versionNumber + " " + dataVersion.versionProfile;
+		return dataVersion.versionProfile == null ? Std.string(dataVersion.versionNumber) :
+			dataVersion.versionNumber + " " + dataVersion.versionProfile;
 	}
 
 	/**
@@ -104,6 +118,10 @@ class GLSLSourceAssembler
 		feature/shader-improvements branch.
 	**/
 	public var vertexSource:String;
+
+	@:noCompletion private var __stack:Int = -1;
+	@:noCompletion private var __sourceKey:String;
+	@:noCompletion private var __pragmaOnces:Map<String, Bool>;
 
 	/**
 		Creates a new GLSLSourceAssembler instance
@@ -284,7 +302,7 @@ class GLSLSourceAssembler
 	public function applyCompatibility(source:String, ?targetVersion:String, isVertex:Bool):String
 	{
 		var dataVersion = __getVersion(targetVersion ?? getDefaultVersion());
-		return __applyCompatibility(source, dataVersion.versionNumber, dataVersion.versionProfile, isVertex);
+		return __applyCompatibility(source, isVertex, dataVersion.versionNumber, dataVersion.versionProfile);
 	}
 
 	/**
@@ -321,7 +339,7 @@ class GLSLSourceAssembler
 		@return	The finalized GLSL source.
 	**/
 	public function assembleSource(source:String, ?pragmas:Map<String, String>, ?extensions:Map<String, String>,
-		?version:String, isVertex:Bool, useCompatibility:Bool = true, precisionHint:ShaderPrecision = FULL):String
+			?version:String, isVertex:Bool, useCompatibility:Bool = true, precisionHint:ShaderPrecision = FULL):String
 	{
 		if (version == null) version = getDefaultVersion();
 
@@ -334,16 +352,7 @@ class GLSLSourceAssembler
 			return __appendPrefix(null, dataVersion.versionNumber, dataVersion.versionProfile, extensions, isVertex, precisionHint);
 		}
 
-		source = __appendIncludes(source, isVertex);
-
-		if (pragmas != null)
-		{
-			source = __getPragmaFinder().map(source, (glPragmaFinder:EReg) ->
-			{
-				var pragma = glPragmaFinder.matched(1);
-				return pragmas.exists(pragma) ? ('/*#pragma $pragma*/\n' + pragmas.get(pragma) + '\n') : '#pragma $pragma';
-			});
-		}
+		source = __assembleSource(source, isVertex, pragmas);
 
 		var data = __getSource(source, version, extensions == null ? new Map() : extensions.copy());
 
@@ -352,41 +361,43 @@ class GLSLSourceAssembler
 
 		if (useCompatibility)
 		{
-			data.source = __applyCompatibility(data.source, data.versionNumber, data.versionProfile, isVertex);
+			data.source = __applyCompatibility(data.source, isVertex, data.versionNumber, data.versionProfile);
 		}
 
 		return __appendPrefix(data.source, data.versionNumber, data.versionProfile, data.extensions, isVertex, precisionHint);
 	}
 
-	private function __applyCompatibility(source:String, versionNumber:Int, versionProfile:Null<String>, isVertex:Bool):String
+	private function __applyCompatibility(source:String, isVertex:Bool, versionNumber:Int, versionProfile:Null<String>):String
 	{
-		// No processing needed on "compatibility" profile
-		if (versionProfile == "compatibility") return source;
-
-		// Recall: Attribute values are per-vertex, varying values are per-fragment
-		// Thus, an `out` value in the vertex shader is an `in` value in the fragment shader
-		var attributeKeyword:EReg = ~/\battribute\s+([A-Za-z0-9_]+)\s+([^\s]+)/gu;
-		var varyingKeyword:EReg = ~/\bvarying\s+(?:lowp\s+|mediump\s+|highp\s+)?([A-Za-z0-9_]+)\s+([^\s]+)/gu;
-
-		var textureKeyword:EReg = ~/\btexture\b/g;
-		var texture2DKeyword:EReg = ~/\btexture2D\b/g;
-		var glFragColorKeyword:EReg = ~/\bgl_FragColor\b/g;
-
-		if (versionNumber >= 130)
+		if (versionProfile != "compatibility" && versionNumber >= 130)
 		{
+			// Recall: Attribute values are per-vertex, varying values are per-fragment
+			// Thus, an `out` value in the vertex shader is an `in` value in the fragment shader
+			var varyingKeyword:EReg = ~/\bvarying\s+(?:lowp\s+|mediump\s+|highp\s+)?([A-Za-z0-9_]+)\s+([^\s]+)/gu;
+
 			if (isVertex)
 			{
+				var attributeKeyword:EReg = ~/\battribute\s+([A-Za-z0-9_]+)\s+([^\s]+)/gu;
+
 				source = attributeKeyword.replace(source, "in $1 $2");
 				source = varyingKeyword.replace(source, "out $1 $2");
 			}
 			else
 			{
+				var glFragColorKeyword:EReg = ~/\bgl_FragColor\b/g;
+
 				source = varyingKeyword.replace(source, "in $1 $2");
+				source = glFragColorKeyword.replace(source, "openfl_FragColor");
 			}
 
-			source = textureKeyword.replace(source, "textureRESERVED");
-			source = texture2DKeyword.replace(source, "texture");
-			source = glFragColorKeyword.replace(source, "openfl_FragColor");
+			var texture2DKeyword:EReg = ~/\btexture2D\b/g;
+
+			if (texture2DKeyword.match(source)) {
+				var textureKeyword:EReg = ~/\btexture\b/g;
+
+				source = textureKeyword.replace(source, "textureRESERVED");
+				source = texture2DKeyword.replace(source, "texture");
+			}
 
 			return source;
 		}
@@ -396,29 +407,58 @@ class GLSLSourceAssembler
 		}
 	}
 
-	private function __appendIncludes(source:String, isVertex:Bool, ?includedKeys:Map<String, Bool>):String
+	private function __assembleSource(source:String, isVertex:Bool, ?pragmas:Map<String, String>):String
 	{
-		if (includedKeys == null) includedKeys = [];
-
-		var includeCommentFinder:EReg = __getIncludeCommentFinder(), lastMatch = 0, position;
-		while (includeCommentFinder.matchSub(source, lastMatch))
+		if (++__stack == 0)
 		{
-			includedKeys.set(includeCommentFinder.matched(1), true);
-
-			position = includeCommentFinder.matchedPos();
-			lastMatch = position.pos + position.len;
+			__pragmaOnces = [];
+			__sourceKey = null;
 		}
 
+		if (pragmas != null) source = __appendPragmas(source, isVertex, pragmas);
+		source = __appendIncludes(source, isVertex, pragmas);
+
+		if (__stack == 0)
+		{
+			__pragmaOnces = null;
+		}
+		__stack--;
+
+		return source;
+	}
+
+	private function __appendPragmas(source:String, isVertex:Bool, pragmas:Map<String, String>):String
+	{
+		return __getPragmaFinder().map(source, (glPragmaFinder:EReg) ->
+		{
+			var pragma = glPragmaFinder.matched(1);
+			if (pragma == "once")
+			{
+				if (__sourceKey != null) __pragmaOnces.set(__sourceKey, true);
+				return "";
+			}
+
+			if (!pragmas.exists(pragma)) return '#pragma $pragma';
+			return '/*#pragma $pragma*/\n' + __assembleSource(pragmas.get(pragma), isVertex, pragmas);
+		});
+	}
+
+	private function __appendIncludes(source:String, isVertex:Bool, ?pragmas:Map<String, String>):String
+	{
 		return __getIncludeFinder().map(source, (regex:EReg) ->
 		{
 			var key = regex.matched(1);
-			if (includedKeys.get(key)) return '/*Recursive include $key*/';
+			if (__pragmaOnces.get(key)) return "";
 
 			var include = __getIncludeSource(key, isVertex);
 			if (include == null) return '/*Unknown include $key*/';
 
-			includedKeys.set(key, true);
-			return '/*#include $key*/\n' + __appendIncludes(include, isVertex, includedKeys);
+			var prevSourceKey = __sourceKey;
+			__sourceKey = key;
+			include = __assembleSource(include, isVertex, pragmas);
+			__sourceKey = prevSourceKey;
+
+			return '/*#include $key*/\n' + include;
 		});
 	}
 
@@ -525,6 +565,8 @@ class GLSLSourceAssembler
 		var versionNumber = dataVersion.versionNumber;
 		var isES = __isVersionES(versionNumber, dataVersion.versionProfile);
 
+		var contextVersion = __getContextVersion();
+
 		#if (web || mobile)
 		if (isES) dataVersion.versionNumber = versionNumber;
 		else if (versionNumber <= 120) dataVersion.versionNumber = 100;
@@ -532,7 +574,6 @@ class GLSLSourceAssembler
 		else if (versionNumber <= 430) dataVersion.versionNumber = 310;
 		else dataVersion.versionNumber = 320;
 		#elseif mac
-		// CodenameCrew's Lime OpenGL uses 4.1 Core profile
 		if (versionNumber <= 120) dataVersion.versionNumber = 100;
 		else if (versionNumber <= 320) dataVersion.versionNumber = 150;
 		else dataVersion.versionNumber = 410;
@@ -544,19 +585,39 @@ class GLSLSourceAssembler
 		else dataVersion.versionNumber = 450;
 		#end
 
+		if (dataVersion.versionNumber > contextVersion.versionNumber)
+			dataVersion.versionNumber = contextVersion.versionNumber;
+
 		if (isES)
 		{
 			if (dataVersion.versionNumber >= 300) dataVersion.versionProfile = "es";
-			else dataVersion.versionProfile = "";
+			else dataVersion.versionProfile = null;
 		}
 		else if (dataVersion.versionNumber >= 150)
 		{
 			if (dataVersion.versionProfile != "compatibility") dataVersion.versionProfile = "core";
 		}
 		else
+			dataVersion.versionProfile = null;
+	}
+
+	private static function __getContextVersion():GLSLDataVersion
+	{
+		#if lime
+		var e = ~/\d\.\d/i, context = Std.string(lime.app.Application.current.window.context.type).toUpperCase();
+		if (e.match(GL.getParameter(GL.SHADING_LANGUAGE_VERSION)))
 		{
-			dataVersion.versionProfile = "";
+			var isES = context == "WEBGL" || StringTools.endsWith(context, "ES");
+			var version = Std.int(Math.max(Math.round(Std.parseFloat(e.matched(0)) * 100), 100));
+
+			if (isES)
+				return version >= 300 ? {versionNumber: version, versionProfile: "es"} : {versionNumber: version, versionProfile: null};
+			else
+				return {versionNumber: version, versionProfile: null};
 		}
+		#end
+
+		return {versionNumber: 100, versionProfile: null};
 	}
 
 	private static function __getSource(source:String, defaultVersion:String, extensions:Map<String, String>):GLSLDataSource
@@ -611,66 +672,35 @@ class GLSLSourceAssembler
 		}
 	}
 
-	/*
-	private static function __getVersionNumber(version:String):Int
-	{
-		var glVersionSeperator:EReg = __getVersionSeperator();
-		if (glVersionSeperator.match(version)) return Std.parseInt(glVersionSeperator.matched(1));
-		else
-		{
-			Log.error('Unable to get a GLSL version number from an unknown GLSL version "${version}"');
-			return null;
-		}
-	}
-
-	private static function __getVersionProfile(version:String):String
-	{
-		var glVersionSeperator:EReg = __getVersionSeperator();
-		if (glVersionSeperator.match(version))
-		{
-			version = glVersionSeperator.matched(2);
-			return version == null ? "" : version;
-		}
-		else
-		{
-			return "";
-		}
-	}
-	*/
-
 	private static inline function __getExtensionFinder():EReg
 	{
-		return ~/(?:^|\s)#extension\s+([A-Za-z0-9_]+)\s+:\s+(enable|require|warn|disable|all)\b/g;
+		return ~/#extension\s+([A-Za-z0-9_]+)\s+:\s+(enable|require|warn|disable|all)\b/g;
 	}
 
 	private static inline function __getPragmaFinder():EReg
 	{
-		return ~/(?:^|\s)#pragma\s+(?|"([^"]+)"|'([^']+)'|([^\s]+))/g;
+		return ~/#pragma\s+(\w+)\b/g;
 	}
 
 	private static inline function __getIncludeFinder():EReg
 	{
-		return ~/(?:^|\s)#include\s+(?|"([^"]+)"|'([^']+)'|([^\s]+))/g;
-	}
-
-	private static inline function __getIncludeCommentFinder():EReg
-	{
-		return ~/(?:^|\s)\/\*#include\s+(?|"([^"]+)"|'([^']+)'|([^\s]+))\*\//g;
+		return ~/#(include|import)\s*(?|"([^"]+)"|'([^']+)')/g;
 	}
 
 	private static inline function __getVersionFinder():EReg
 	{
-		return ~/(?:^|\s)#version\s+(\d+)(?:\s+)?(core|es|compatibility)?\b/;
+		return ~/#version\s+(\d+)(?:\s+(core|es|compatibility)\b)?/;
 	}
 
 	private static inline function __getVersionSeperator():EReg
 	{
-		return ~/(\d+)(?:\s+)?(core|es|compatibility)?\b/;
+		return ~/(\d+)(?:\s+(core|es|compatibility)\b)?/;
 	}
 
 	private static inline function __isVersionES(versionNumber:Int, ?versionProfile:String):Bool
 	{
-		return versionProfile == "es" || (versionProfile == null && (versionNumber == 100 || versionNumber == 300 || versionNumber == 310 || versionNumber == 320));
+		return versionProfile == "es" || (versionProfile == null
+			&& (versionNumber == 100 || versionNumber == 300 || versionNumber == 310 || versionNumber == 320));
 	}
 }
 
