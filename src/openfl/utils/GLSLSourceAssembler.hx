@@ -566,26 +566,52 @@ class GLSLSourceAssembler
 		var isES = __isVersionES(versionNumber, dataVersion.versionProfile);
 
 		var contextVersion = __getContextVersion();
+		var isContextES = __isVersionES(contextVersion.versionNumber, contextVersion.versionProfile);
 
-		#if (web || mobile)
-		if (isES) dataVersion.versionNumber = versionNumber;
-		else if (versionNumber <= 120) dataVersion.versionNumber = 100;
-		else if (versionNumber <= 420) dataVersion.versionNumber = 300;
-		else if (versionNumber <= 430) dataVersion.versionNumber = 310;
-		else dataVersion.versionNumber = 320;
-		#elseif mac
-		if (versionNumber <= 120) dataVersion.versionNumber = 100;
-		else if (versionNumber <= 320) dataVersion.versionNumber = 150;
-		else dataVersion.versionNumber = 410;
+		#if mac
+		if ((isES == (isES = false)))
+		{
+			if (versionNumber <= 100) dataVersion.versionNumber = 100;
+			else dataVersion.versionNumber = 410;
+		}
+		else
+		{
+			if (versionNumber <= 100) dataVersion.versionNumber = 100;
+			else if (versionNumber <= 320) dataVersion.versionNumber = 150;
+			else dataVersion.versionNumber = 410;
+		}
 		#else
-		if (!isES) dataVersion.versionNumber = versionNumber;
-		else if (versionNumber <= 100) dataVersion.versionNumber = 120;
-		else if (versionNumber <= 300) dataVersion.versionNumber = 300;
-		else if (versionNumber <= 310) dataVersion.versionNumber = 430;
-		else dataVersion.versionNumber = 450;
+		if (isES == (isES = isContextES)) dataVersion.versionNumber = versionNumber;
+		else if (isContextES)
+		{
+			if (versionNumber <= 120) dataVersion.versionNumber = 100;
+			else if (versionNumber <= 420) dataVersion.versionNumber = 300;
+			else if (versionNumber <= 430) dataVersion.versionNumber = 310;
+			else dataVersion.versionNumber = 320;
+		}
+		else
+		{
+			if (versionNumber <= 100) dataVersion.versionNumber = 120;
+			else if (versionNumber <= 300) dataVersion.versionNumber = 300;
+			else if (versionNumber <= 310) dataVersion.versionNumber = 430;
+			else dataVersion.versionNumber = 450;
+		}
 		#end
 
-		if (dataVersion.versionNumber > contextVersion.versionNumber)
+		if (!OpenGLRenderer.__separateShadersSupported)
+		{
+			if (isES ? (dataVersion.versionNumber == 300 && contextVersion.versionNumber >= 310)
+					: (dataVersion.versionNumber >= 330 && dataVersion.versionNumber < 410 && contextVersion.versionNumber >= 410))
+			{
+				dataVersion.versionNumber = 410;
+			}
+			// this is horrible
+			else if (isES)
+				dataVersion.versionNumber = 100;
+			else
+				dataVersion.versionNumber = 150;
+		}
+		else if (dataVersion.versionNumber > contextVersion.versionNumber)
 			dataVersion.versionNumber = contextVersion.versionNumber;
 
 		if (isES)
