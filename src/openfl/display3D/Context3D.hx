@@ -405,12 +405,13 @@ import lime.math.Vector2;
 		{
 			TextureBase.__textureInternalFormat = gl.RGBA;
 
-			var bgraExtension:Dynamic = null;
-			#if (!js || !html5)
-			bgraExtension = gl.getExtension("EXT_bgra");
+			#if desktop
+			TextureBase.__supportsBGRA = true;
+			TextureBase.__textureFormat = 0x80E1/*BGRA*/;
+			#elseif mobile
+			var bgraExtension:Dynamic = bgraExtension = gl.getExtension("EXT_bgra");
 			if (bgraExtension == null) bgraExtension = gl.getExtension("EXT_texture_format_BGRA8888");
 			if (bgraExtension == null) bgraExtension = gl.getExtension("APPLE_texture_format_BGRA8888");
-			#end
 
 			if (bgraExtension != null)
 			{
@@ -419,10 +420,7 @@ import lime.math.Vector2;
 
 				// Note: Get rid of this when `ANGLE` is added.
 				#if (lime && !ios)
-				if (__context.type == OPENGLES)
-				{
-					TextureBase.__textureInternalFormat = bgraExtension.BGRA_EXT;
-				}
+				TextureBase.__textureInternalFormat = bgraExtension.BGRA_EXT;
 				#end
 			}
 			else
@@ -430,6 +428,10 @@ import lime.math.Vector2;
 				TextureBase.__supportsBGRA = false;
 				TextureBase.__textureFormat = gl.RGBA;
 			}
+			#else
+			TextureBase.__supportsBGRA = false;
+			TextureBase.__textureFormat = gl.RGBA;
+			#end
 		}
 
 		driverInfo = __driverInfo;
