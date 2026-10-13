@@ -3603,6 +3603,7 @@ class BitmapData implements IBitmapDrawable
 		__textureVersion = 0;
 		__texture.__uploadFromImage(__imageAssetCache);
 
+		cpp.NativeArray.setSize(__imageAssetCache.buffer.data.buffer.b, 0);
 		image = null;
 		__surface = null;
 		readable = false;
