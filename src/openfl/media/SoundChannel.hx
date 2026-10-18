@@ -83,6 +83,9 @@ import lime.utils.Int16Array;
 	#end
 	#if lime
 	@:noCompletion private var __audioSource:AudioSource;
+	@:noCompletion private var __source(get, set):AudioSource;
+	function get___source():AudioSource return __audioSource;
+	function set___source(v:AudioSource):AudioSource return __audioSource = v;
 	#end
 
 	#if (js && html5)
