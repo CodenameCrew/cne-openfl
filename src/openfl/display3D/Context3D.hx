@@ -353,9 +353,9 @@ import lime.math.Vector2;
 			#if (js && html5)
 			__glDepthStencil = gl.DEPTH_STENCIL;
 			#else
-			if (__context.type == OPENGLES && Std.parseFloat(__context.version) >= 3)
+			if (Std.parseFloat(__context.version) >= 3)
 			{
-				__glDepthStencil = __context.gles3.DEPTH24_STENCIL8;
+				__glDepthStencil = GL.DEPTH24_STENCIL8;
 			}
 			else
 			{
