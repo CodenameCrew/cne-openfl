@@ -91,32 +91,62 @@ class Shader
 		}
 	}
 
-	public static function processGLSLParameter(source:String, storageType:String, callback:ShaderProcessParameterCallback):String
+	public static function processGLSLParameter(source:String, storageType:String, callback:ShaderProcessParameterCallback, ?keepUniforms:Bool):String
 	{
-		var isVertex = storageType != "uniform", regex:EReg = switch (storageType)
+		// 1 -> precision, 2 -> type, 3 -> declarations
+		var isUniform = storageType == "uniform", statement:EReg = switch (storageType)
 		{
-			case "uniform": ~/\buniform\s+([A-Za-z0-9_]+)\s+([A-Za-z0-9_]+)(?:\s*)?(?:\[(\w+)\])?\s*(?:=)?\s*(.+?(?=;))?/gu;
-			case "in": ~/\bin\s+([A-Za-z0-9_]+)\s+([A-Za-z0-9_]+)(?:\s*)?(?:\[(\w+)\])?/gu;
-			case "attribute": ~/\battribute\s+([A-Za-z0-9_]+)\s+([A-Za-z0-9_]+)(?:\s*)?(?:\[(\w+)\])?/gu;
+			case "uniform": ~/\buniform\s+((?:highp|mediump|lowp)\s+)?(\w+(?:\s*\[[^\]]*\])?)\s+([^;{}]+);/gu;
+			case "in": ~/\bin\s+((?:highp|mediump|lowp)\s+)?(\w+(?:\s*\[[^\]]*\])?)\s+([^;{}]+);/gu;
+			case "attribute": ~/\battribute\s+((?:highp|mediump|lowp)\s+)?(\w+(?:\s*\[[^\]]*\])?)\s+([^;{}]+);/gu;
 			default: throw "Unknown storageType for Shader.processGLSLParameter " + storageType;
 		}
 
-		var arrayLength:Null<Int>, position;
-		return regex.map(source, (_) ->
+		// 1 -> name, 2 -> array, 3 -> define (uniform only)
+		var declarator:EReg = switch (isUniform)
 		{
-			if (regex.matched(3) == null) arrayLength = 0;
-			else if ((arrayLength = Std.parseInt(regex.matched(3))) == null) arrayLength = 1;
+			case true: ~/\s*(\w+)\s*((?:\[[^\]]*\]\s*)*)(?:=\s*((?:[^,()]|\((?:[^()]|\([^()]*\))*\))+))?\s*(?:,|$)/gu;
+			default: ~/\s*(\w+)\s*((?:\[[^\]]*\]\s*)*)\s*(?:,|$)/gu;
+		}
 
-			callback(isVertex, regex.matched(1), regex.matched(2), arrayLength, isVertex ? null : regex.matched(4));
+		var fixDeclarations = isUniform && !keepUniforms;
+		var type:String, declarations:String, fixedDeclarations:String, position;
+		var name:String, array:String, arrayLength:Null<Int>, pos:Int;
 
-			if (isVertex)
+		// (isVertex:Bool, typeName:String, name:String, arrayLength:Int, defaultAssign:Null<String>)
+		return statement.map(source, (_) ->
+		{
+			type = statement.matched(2);
+			declarations = statement.matched(3);
+			fixedDeclarations = null;
+			pos = 0;
+
+			while (declarator.matchSub(declarations, pos))
 			{
-				position = regex.matchedPos();
+				if ((array = declarator.matched(2)) == "" || array == null) arrayLength = 0;
+				else if ((arrayLength = Std.parseInt((array = StringTools.trim(array)).substr(1, array.length - 1))) == null) arrayLength = 1;
+
+				callback(!isUniform, type, name = declarator.matched(1), arrayLength, isUniform ? declarator.matched(3) : null);
+
+				if (fixDeclarations)
+				{
+					if (fixedDeclarations == null) fixedDeclarations = '$name$array';
+					else fixedDeclarations += ', $name$array';
+				}
+
+				position = declarator.matchedPos();
+				pos = position.pos + position.len;
+			}
+
+			if (fixDeclarations || fixedDeclarations == null)
+			{
+				position = statement.matchedPos();
 				return source.substr(position.pos, position.len);
 			}
 			else
 			{
-				return 'uniform ${regex.matched(1)} ${regex.matched(2)}${arrayLength == 0 ? "" : "[" + regex.matched(3) + "]"}';
+				return if ((name = statement.matched(1)) == "" || name == null) 'uniform $type $fixedDeclarations;';
+					else 'uniform $name $type $fixedDeclarations;';
 			}
 		});
 	}

@@ -236,121 +236,133 @@ class ShaderMacro
 	{
 		if (source == null) return;
 
-		var isUniform = storageType == "uniform";
-		var regex:EReg = switch (storageType)
+		// Copy-pasted from Shader.processGLSLParameter & Shader.getParameterTypeFromGLSL
+		var isUniform = storageType == "uniform", statement:EReg = switch (storageType)
 		{
-			case "uniform": ~/\buniform\s+([A-Za-z0-9_]+)\s+([A-Za-z0-9_]+)(?:\s*)?(?:\[(\w+)\])?\s*(?:=)?\s*(.+?(?=;))?/gu;
-			case "in": ~/\bin\s+([A-Za-z0-9_]+)\s+([A-Za-z0-9_]+)(?:\s*)?(?:\[(\w+)\])?/gu;
-			case "attribute": ~/\battribute\s+([A-Za-z0-9_]+)\s+([A-Za-z0-9_]+)(?:\s*)?(?:\[(\w+)\])?/gu;
+			case "uniform": ~/\buniform\s+((?:highp|mediump|lowp)\s+)?(\w+(?:\s*\[[^\]]*\])?)\s+([^;{}]+);/gu;
+			case "in": ~/\bin\s+((?:highp|mediump|lowp)\s+)?(\w+(?:\s*\[[^\]]*\])?)\s+([^;{}]+);/gu;
+			case "attribute": ~/\battribute\s+((?:highp|mediump|lowp)\s+)?(\w+(?:\s*\[[^\]]*\])?)\s+([^;{}]+);/gu;
 			default: throw "Unknown storageType " + storageType;
 		}
 
-		var name, type:openfl.display.ShaderParameterType, isSampler:Bool, arrayLength:Null<Int>, size:Int, defaultAssign:Null<String>;
-		var field:Field, fieldAccess:Access, fieldMeta:Metadata, fieldType:ComplexType;
-		var lastMatch = 0, position;
-
-		while (regex.matchSub(source, lastMatch))
+		var declarator:EReg = switch (isUniform)
 		{
-			name = regex.matched(2);
-			if (fieldNames.exists(name) || StringTools.startsWith(name, "gl_"))
-			{
-				position = regex.matchedPos();
-				lastMatch = position.pos + position.len;
-				continue;
-			}
+			case true: ~/\s*(\w+)\s*((?:\[[^\]]*\]\s*)*)(?:=\s*((?:[^,()]|\((?:[^()]|\([^()]*\))*\))+))?\s*(?:,|$)/gu;
+			default: ~/\s*(\w+)\s*((?:\[[^\]]*\]\s*)*)\s*(?:,|$)/gu;
+		}
 
-			if (regex.matched(3) == null) arrayLength = 0;
-			else if ((arrayLength = Std.parseInt(regex.matched(3))) == null) arrayLength = 1;
+		var typeName:String, declarations:String, spos:Int = 0, position;
+		var array:String, dpos:Int;
 
-			if (StringTools.startsWith(regex.matched(1), "sampler"))
+		var type:openfl.display.ShaderParameterType, isSampler:Bool, name:String, arrayLength:Null<Int>, defaultAssign:Null<String>;
+		var fieldType:ComplexType, field:Field, fieldAccess:Access, fieldMeta:Metadata, fieldType:ComplexType;
+
+		while (statement.matchSub(source, spos))
+		{
+			if (isSampler = StringTools.startsWith(typeName = statement.matched(2), "sampler"))
 			{
-				isSampler = true;
-				type = null;
 				fieldType = macro :openfl.display.ShaderInput<openfl.display.BitmapData>;
 			}
-			else
+
+			declarations = statement.matched(3);
+			dpos = 0;
+
+			while (declarator.matchSub(declarations, dpos))
 			{
-				isSampler = false;
-				type = switch (regex.matched(1))
+				if (fieldNames.exists(name = declarator.matched(1)) || StringTools.startsWith(name, "gl_"))
 				{
-					case "bool": arrayLength != 0 ? BOOLV : BOOL;
-					case "double", "float": arrayLength != 0 ? FLOATV : FLOAT;
-					case "int", "uint": arrayLength != 0 ? INTV : INT;
-					case "bvec2": arrayLength != 0 ? BOOL2V : BOOL2;
-					case "bvec3": arrayLength != 0 ? BOOL3V : BOOL3;
-					case "bvec4": arrayLength != 0 ? BOOL4V : BOOL4;
-					case "ivec2", "uvec2": arrayLength != 0 ? INT2V : INT2;
-					case "ivec3", "uvec3": arrayLength != 0 ? INT3V : INT3;
-					case "ivec4", "uvec4": arrayLength != 0 ? INT4V : INT4;
-					case "vec2", "dvec2": arrayLength != 0 ? FLOAT2V : FLOAT2;
-					case "vec3", "dvec3": arrayLength != 0 ? FLOAT3V : FLOAT3;
-					case "vec4", "dvec4": arrayLength != 0 ? FLOAT4V : FLOAT4;
-					case "mat2", "mat2x2": arrayLength != 0 ? MATRIX2X2V : MATRIX2X2;
-					case "mat2x3": arrayLength != 0 ? MATRIX2X3V : MATRIX2X3;
-					case "mat2x4": arrayLength != 0 ? MATRIX2X4V : MATRIX2X4;
-					case "mat3x2": arrayLength != 0 ? MATRIX3X2V : MATRIX3X2;
-					case "mat3", "mat3x3": arrayLength != 0 ? MATRIX3X3V : MATRIX3X3;
-					case "mat3x4": arrayLength != 0 ? MATRIX3X4V : MATRIX3X4;
-					case "mat4x2": arrayLength != 0 ? MATRIX4X2V : MATRIX4X2;
-					case "mat4x3": arrayLength != 0 ? MATRIX4X3V : MATRIX4X3;
-					case "mat4", "mat4x4": arrayLength != 0 ? MATRIX4X4V : MATRIX4X4;
-					default: null;
+					dpos = (position = declarator.matchedPos()).pos + position.len;
+					continue;
 				}
 
-				switch (type)
+				if ((array = declarator.matched(2)) == "" || array == null) arrayLength = 0;
+				else if ((arrayLength = Std.parseInt((array = StringTools.trim(array)).substr(1, array.length - 1))) == null) arrayLength = 1;
+
+				if (!isSampler)
 				{
-					case BOOL, BOOL2, BOOL3, BOOL4, BOOLV, BOOL2V, BOOL3V, BOOL4V:
-						fieldType = macro :openfl.display.ShaderParameter<Bool>;
+					type = switch (typeName)
+					{
+						case "bool": arrayLength != 0 ? BOOLV : BOOL;
+						case "double", "float": arrayLength != 0 ? FLOATV : FLOAT;
+						case "int", "uint": arrayLength != 0 ? INTV : INT;
+						case "bvec2": arrayLength != 0 ? BOOL2V : BOOL2;
+						case "bvec3": arrayLength != 0 ? BOOL3V : BOOL3;
+						case "bvec4": arrayLength != 0 ? BOOL4V : BOOL4;
+						case "ivec2", "uvec2": arrayLength != 0 ? INT2V : INT2;
+						case "ivec3", "uvec3": arrayLength != 0 ? INT3V : INT3;
+						case "ivec4", "uvec4": arrayLength != 0 ? INT4V : INT4;
+						case "vec2", "dvec2": arrayLength != 0 ? FLOAT2V : FLOAT2;
+						case "vec3", "dvec3": arrayLength != 0 ? FLOAT3V : FLOAT3;
+						case "vec4", "dvec4": arrayLength != 0 ? FLOAT4V : FLOAT4;
+						case "mat2", "mat2x2": arrayLength != 0 ? MATRIX2X2V : MATRIX2X2;
+						case "mat2x3": arrayLength != 0 ? MATRIX2X3V : MATRIX2X3;
+						case "mat2x4": arrayLength != 0 ? MATRIX2X4V : MATRIX2X4;
+						case "mat3x2": arrayLength != 0 ? MATRIX3X2V : MATRIX3X2;
+						case "mat3", "mat3x3": arrayLength != 0 ? MATRIX3X3V : MATRIX3X3;
+						case "mat3x4": arrayLength != 0 ? MATRIX3X4V : MATRIX3X4;
+						case "mat4x2": arrayLength != 0 ? MATRIX4X2V : MATRIX4X2;
+						case "mat4x3": arrayLength != 0 ? MATRIX4X3V : MATRIX4X3;
+						case "mat4", "mat4x4": arrayLength != 0 ? MATRIX4X4V : MATRIX4X4;
+						default: null;
+					}
 
-					case INT, INT2, INT3, INT4, INTV, INT2V, INT3V, INT4V:
-						fieldType = macro :openfl.display.ShaderParameter<Int>;
+					switch (type)
+					{
+						case BOOL, BOOL2, BOOL3, BOOL4, BOOLV, BOOL2V, BOOL3V, BOOL4V:
+							fieldType = macro :openfl.display.ShaderParameter<Bool>;
 
-					default:
-						fieldType = macro :openfl.display.ShaderParameter<Float>;
+						case INT, INT2, INT3, INT4, INTV, INT2V, INT3V, INT4V:
+							fieldType = macro :openfl.display.ShaderParameter<Int>;
+
+						default:
+							fieldType = macro :openfl.display.ShaderParameter<Float>;
+					}
 				}
+
+				if (StringTools.startsWith(name, "openfl_"))
+				{
+					fieldMeta = [
+						{name: ":keep", pos: pos},
+						{name: ":dox", params: [macro hide], pos: pos},
+						{name: ":noCompletion", pos: pos},
+						{name: ":allow", params: [macro openfl.display._internal], pos: pos},
+						{name: "param", pos: pos}
+					];
+					fieldAccess = APrivate;
+				}
+				else
+				{
+					fieldMeta = [{name: ":keep", pos: pos}, {name: "param", pos: pos}];
+					fieldAccess = APublic;
+				}
+
+				field = {
+					name: name,
+					meta: fieldMeta,
+					access: [fieldAccess],
+					kind: FVar(fieldType),
+					pos: pos
+				};
+
+				fields.push(field);
+				fieldNames.set(name, true);
+
+				if (arrayLength == 0) arrayLength = 1;
+				if (isUniform && (defaultAssign = declarator.matched(3)) != null) {
+					paramBlock.push(macro __registerParameter($v{name}, cast $v{type}, $v{isSampler}, $v{arrayLength}, null, $v{isUniform},
+						__getParameterDefault($v{defaultAssign}, cast $v{type}, $v{isSampler})));
+				}
+				else {
+					paramBlock.push(macro __registerParameter($v{name}, cast $v{type}, $v{isSampler}, $v{arrayLength}, null, $v{isUniform}, null));
+				}
+
+				position = declarator.matchedPos();
+				dpos = position.pos + position.len;
 			}
 
-			if (StringTools.startsWith(name, "openfl_"))
-			{
-				fieldMeta = [
-					{name: ":keep", pos: pos},
-					{name: ":dox", params: [macro hide], pos: pos},
-					{name: ":noCompletion", pos: pos},
-					{name: ":allow", params: [macro openfl.display._internal], pos: pos},
-					{name: "param", pos: pos}
-				];
-				fieldAccess = APrivate;
-			}
-			else
-			{
-				fieldMeta = [{name: ":keep", pos: pos}, {name: "param", pos: pos}];
-				fieldAccess = APublic;
-			}
-
-			field = {
-				name: name,
-				meta: fieldMeta,
-				access: [fieldAccess],
-				kind: FVar(fieldType),
-				pos: pos
-			};
-
-			fields.push(field);
-			fieldNames.set(name, true);
-
-			size = arrayLength == 0 ? 1 : arrayLength;
-			defaultAssign = isUniform ? regex.matched(4) : null;
-			if (defaultAssign != null) {
-				paramBlock.push(macro __registerParameter($v{name}, cast $v{type}, $v{isSampler}, $v{size}, null, $v{isUniform},
-					__getParameterDefault($v{defaultAssign}, cast $v{type}, $v{isSampler})));
-			}
-			else {
-				paramBlock.push(macro __registerParameter($v{name}, cast $v{type}, $v{isSampler}, $v{size}, null, $v{isUniform}, null));
-			}
-
-			position = regex.matchedPos();
-			lastMatch = position.pos + position.len;
-		}
+			position = statement.matchedPos();
+			spos = position.pos + position.len;
+		};
 	}
 }
 #end
