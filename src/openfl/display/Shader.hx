@@ -505,6 +505,10 @@ class Shader
 					}
 				}
 			}
+			else if (Lib.current.stage != null)
+			{
+				__context = Lib.current.stage.context3D;
+			}
 
 			if (program != null)
 			{

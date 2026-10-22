@@ -194,19 +194,25 @@ class Context3DGraphics
 					var c = data.readBeginShaderFill();
 					var shaderBuffer = c.shaderBuffer;
 
-					bitmap = null;
 					bitmapMatrix = null;
 
 					if (shaderBuffer != null)
 					{
+						var shader = shaderBuffer.shader;
+						bitmap = shader.__bitmap.input;
+
 						for (i in 0...shaderBuffer.inputCount)
 						{
-							if (shaderBuffer.inputRefs[i].name == "bitmap")
+							if (shaderBuffer.inputRefs[i] == shader.__bitmap)
 							{
 								bitmap = shaderBuffer.inputs[i];
 								break;
 							}
 						}
+					}
+					else
+					{
+						bitmap = null;
 					}
 
 				case DRAW_QUADS:
@@ -893,13 +899,23 @@ class Context3DGraphics
 							shaderBuffer = c.shaderBuffer;
 							shaderBufferOffset = 0;
 
-							if (shaderBuffer == null || shaderBuffer.shader == null || shaderBuffer.shader.__bitmap == null)
+							if (shaderBuffer != null)
 							{
-								bitmap = null;
+								var shader = shaderBuffer.shader;
+								bitmap = shader.__bitmap.input;
+
+								for (i in 0...shaderBuffer.inputCount)
+								{
+									if (shaderBuffer.inputRefs[i] == shader.__bitmap)
+									{
+										bitmap = shaderBuffer.inputs[i];
+										break;
+									}
+								}
 							}
 							else
 							{
-								bitmap = shaderBuffer.shader.__bitmap.input;
+								bitmap = null;
 							}
 
 							fill = null;
