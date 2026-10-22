@@ -109,14 +109,13 @@ class Shader
 			default: ~/\s*(\w+)\s*((?:\[[^\]]*\]\s*)*)\s*(?:,|$)/gu;
 		}
 
-		var fixDeclarations = isUniform && !keepUniforms;
-		var type:String, declarations:String, fixedDeclarations:String, position;
-		var name:String, array:String, arrayLength:Null<Int>, pos:Int;
+		var type:String, isSampler:Bool, declarations:String, fixedDeclarations:String, position;
+		var name:String, array:String, arrayLength:Null<Int>, define:Null<String>, pos:Int;
 
 		// (isVertex:Bool, typeName:String, name:String, arrayLength:Int, defaultAssign:Null<String>)
 		return statement.map(source, (_) ->
 		{
-			type = statement.matched(2);
+			isSampler = StringTools.startsWith(type = statement.matched(2), "sampler");
 			declarations = statement.matched(3);
 			fixedDeclarations = null;
 			pos = 0;
@@ -126,19 +125,21 @@ class Shader
 				if ((array = declarator.matched(2)) == "" || array == null) arrayLength = 0;
 				else if ((arrayLength = Std.parseInt((array = StringTools.trim(array)).substr(1, array.length - 1))) == null) arrayLength = 1;
 
-				callback(!isUniform, type, name = declarator.matched(1), arrayLength, isUniform ? declarator.matched(3) : null);
+				callback(!isUniform, type, name = declarator.matched(1), arrayLength, define = isUniform ? declarator.matched(3) : null);
 
-				if (fixDeclarations)
+				if (isUniform)
 				{
 					if (fixedDeclarations == null) fixedDeclarations = '$name$array';
 					else fixedDeclarations += ', $name$array';
+
+					if (define != null && !isSampler) fixedDeclarations += " = " + define;
 				}
 
 				position = declarator.matchedPos();
 				pos = position.pos + position.len;
 			}
 
-			if (fixDeclarations || fixedDeclarations == null)
+			if (fixedDeclarations == null)
 			{
 				position = statement.matchedPos();
 				return source.substr(position.pos, position.len);
@@ -568,10 +569,12 @@ class Shader
 				}
 				else
 				{
-					processGLSLParameter(__glVertexSource, "attribute", __processGLSLParameterCallback);
-					processGLSLParameter(__glVertexSource, "in", __processGLSLParameterCallback);
-					processGLSLParameter(__glVertexSource, "uniform", __processGLSLParameterCallback);
-					processGLSLParameter(__glFragmentSource, "uniform", __processGLSLParameterCallback);
+					@:privateAccess var is120 = GLSLSourceAssembler.__getVersion(__glVersion).versionNumber >= 120;
+
+					processGLSLParameter(__glVertexSource, "attribute", __processGLSLParameterCallback, is120);
+					processGLSLParameter(__glVertexSource, "in", __processGLSLParameterCallback, is120);
+					processGLSLParameter(__glVertexSource, "uniform", __processGLSLParameterCallback, is120);
+					processGLSLParameter(__glFragmentSource, "uniform", __processGLSLParameterCallback, is120);
 				}
 			}
 
@@ -727,9 +730,10 @@ class Shader
 		for (i in 0...program.__glslSamplerNames.length)
 		{
 			__registerParameter(program.__glslSamplerNames[i], null, true, 1, program.__glslSamplerLocations[i],
-				true, __getParameterDefault(program.__glslUniformDefaults[i], null, true));
+				true, __getParameterDefault(program.__glslSamplerDefaultAssigns[i], null, true));
 		}
 
+		var def:Dynamic;
 		for (i in 0...program.__glslUniformNames.length)
 		{
 			name = program.__glslUniformNames[i];
@@ -738,8 +742,9 @@ class Shader
 				continue;
 			}
 
+			def = program.__glslUniformDefaults[i];
 			__registerParameter(name, program.__glslUniformTypes[i], false, program.__glslUniformSizes[i], program.__glslUniformLocations[i],
-				true, __getParameterDefault(program.__glslUniformDefaults[i], program.__glslUniformTypes[i], false));
+				true, def != null ? def : __getParameterDefault(program.__glslUniformDefaultAssigns[i], program.__glslUniformTypes[i], false));
 		}
 	}
 

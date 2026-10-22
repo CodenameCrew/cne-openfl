@@ -1,11 +1,14 @@
 package openfl.display3D;
 
+import haxe.io.Bytes;
 import openfl.display3D._internal.GLProgram;
 import openfl.display3D._internal.GLShader;
 import openfl.display3D._internal.GLUniformLocation;
 import openfl.display3D._internal.AGALConverter;
 import openfl.display._internal.SamplerState;
 import openfl.utils._internal.Float32Array;
+import openfl.utils._internal.Int32Array;
+import openfl.utils._internal.UInt32Array;
 import openfl.utils._internal.Log;
 import openfl.display.Shader;
 import openfl.display.ShaderParameterType;
@@ -44,14 +47,15 @@ import lime.utils.BytePointer;
 	@:noCompletion private var __glVertexVersion:String;
 	@:noCompletion private var __glProgram:GLProgram;
 	@:noCompletion private var __glslSamplerLocations:Array<Null<GLUniformLocation>>;
-	@:noCompletion private var __glslSamplerDefaults:Array<String>;
+	@:noCompletion private var __glslSamplerDefaultAssigns:Array<String>;
 	@:noCompletion private var __glslSamplerNames:Array<String>;
 	@:noCompletion private var __glslAttribLocations:Array<Null<Int>>;
 	@:noCompletion private var __glslAttribNames:Array<String>;
 	@:noCompletion private var __glslAttribTypes:Array<ShaderParameterType>;
 	@:noCompletion private var __glslAttribSizes:Array<Int>;
 	@:noCompletion private var __glslUniformLocations:Array<Null<GLUniformLocation>>;
-	@:noCompletion private var __glslUniformDefaults:Array<String>;
+	@:noCompletion private var __glslUniformDefaultAssigns:Array<String>;
+	@:noCompletion private var __glslUniformDefaults:Array<Null<Array<Dynamic>>>;
 	@:noCompletion private var __glslUniformNames:Array<String>;
 	@:noCompletion private var __glslUniformTypes:Array<ShaderParameterType>;
 	@:noCompletion private var __glslUniformSizes:Array<Int>;
@@ -72,13 +76,14 @@ import lime.utils.BytePointer;
 		}
 		// these need to be created regardless, since AGAL shaders are converted into GLSL
 		__glslSamplerLocations = new Array();
-		__glslSamplerDefaults = new Array();
+		__glslSamplerDefaultAssigns = new Array();
 		__glslSamplerNames = new Array();
 		__glslAttribLocations = new Array();
 		__glslAttribNames = new Array();
 		__glslAttribTypes = new Array();
 		__glslAttribSizes = new Array();
 		__glslUniformLocations = new Array();
+		__glslUniformDefaultAssigns = new Array();
 		__glslUniformDefaults = new Array();
 		__glslUniformNames = new Array();
 		__glslUniformTypes = new Array();
@@ -209,7 +214,7 @@ import lime.utils.BytePointer;
 
 		#if haxe4
 		__glslSamplerLocations.resize(0);
-		__glslSamplerDefaults.resize(0);
+		__glslSamplerDefaultAssigns.resize(0);
 		__glslSamplerNames.resize(0);
 		__glslAttribLocations.resize(0);
 		__glslAttribNames.resize(0);
@@ -217,18 +222,20 @@ import lime.utils.BytePointer;
 		__glslAttribSizes.resize(0);
 		__glslUniformLocations.resize(0);
 		__glslUniformDefaults.resize(0);
+		__glslUniformDefaultAssigns.resize(0);
 		__glslUniformNames.resize(0);
 		__glslUniformTypes.resize(0);
 		__glslUniformSizes.resize(0);
 		#else
 		__glslSamplerLocations = new Array();
-		__glslSamplerDefaults = new Array();
+		__glslSamplerDefaultAssigns = new Array();
 		__glslSamplerNames = new Array();
 		__glslAttribLocations = new Array();
 		__glslAttribNames = new Array();
 		__glslAttribTypes = new Array();
 		__glslAttribSizes = new Array();
 		__glslUniformLocations = new Array();
+		__glslUniformDefaultAssigns = new Array();
 		__glslUniformDefaults = new Array();
 		__glslUniformNames = new Array();
 		__glslUniformTypes = new Array();
@@ -604,7 +611,7 @@ import lime.utils.BytePointer;
 	@:noCompletion private function __buildGLSLParamList():Void
 	{
 		var gl = __context.gl;
-		var idx:Int, name:String, info;
+		var idx:Int, name:String, isArray:Bool, info;
 		var regexName = ~/([A-Za-z0-9_]+)(?:\[(\w+)\])?/;
 
 		var num = gl.getProgramParameter(__glProgram, gl.ACTIVE_ATTRIBUTES);
@@ -612,55 +619,142 @@ import lime.utils.BytePointer;
 		{
 			regexName.match((info = gl.getActiveAttrib(__glProgram, i)).name);
 			idx = __glslAttribNames.indexOf(name = regexName.matched(1));
+			isArray = regexName.matched(2) != null;
 			if (idx == -1)
 			{
 				__glslAttribLocations.push(gl.getAttribLocation(__glProgram, info.name));
 				__glslAttribNames.push(name);
-				__glslAttribTypes.push(Shader.getParameterTypeFromGLEnum(info.type, info.size > 1));
+				__glslAttribTypes.push(Shader.getParameterTypeFromGLEnum(info.type, isArray));
 				__glslAttribSizes.push(info.size);
 			}
 			else
 			{
 				__glslAttribLocations[idx] = gl.getAttribLocation(__glProgram, info.name);
-				__glslAttribTypes[idx] = Shader.getParameterTypeFromGLEnum(info.type, info.size > 1);
+				__glslAttribTypes[idx] = Shader.getParameterTypeFromGLEnum(info.type, isArray);
 				__glslAttribSizes[idx] = info.size;
 			}
 		}
 
-		var num = gl.getProgramParameter(__glProgram, gl.ACTIVE_UNIFORMS);
+		var num = gl.getProgramParameter(__glProgram, gl.ACTIVE_UNIFORMS), loc:Null<GLUniformLocation>, def:Array<Dynamic>;
 		for (i in 0...num)
 		{
 			regexName.match((info = gl.getActiveUniform(__glProgram, i)).name);
 			name = regexName.matched(1);
+			isArray = regexName.matched(2) != null;
+
+			loc = gl.getUniformLocation(__glProgram, info.name);
+
 			if (info.type == gl.SAMPLER_2D || info.type == gl.SAMPLER_CUBE)
 			{
 				idx = __glslSamplerNames.indexOf(name);
 				if (idx == -1)
 				{
-					__glslSamplerLocations.push(gl.getUniformLocation(__glProgram, info.name));
-					__glslSamplerDefaults.push(null);
+					__glslSamplerLocations.push(loc);
+					__glslSamplerDefaultAssigns.push(null);
 					__glslSamplerNames.push(name);
 				}
 				else
 				{
-					__glslSamplerLocations[idx] = gl.getUniformLocation(__glProgram, info.name);
+					__glslSamplerLocations[idx] = loc;
 				}
 			}
 			else
 			{
+				#if (lime_opengl || lime_opengles)
+				def = null;
+
+				var bools = 0, ints = 0, uints = 0, floats = 0;
+
+				switch (info.type)
+				{
+					case GL.BOOL: bools = 1;
+					case GL.INT: ints = 1;
+					case GL.UNSIGNED_INT: uints = 1;
+					case GL.FLOAT: floats = 1;
+					case GL.FLOAT_VEC2: floats = 2;
+					case GL.INT_VEC2: ints = 2;
+					case GL.UNSIGNED_INT_VEC2: uints = 2;
+					case GL.BOOL_VEC2: bools = 2;
+					case GL.FLOAT_VEC3: floats = 3;
+					case GL.INT_VEC3: ints = 3;
+					case GL.UNSIGNED_INT_VEC3: uints = 3;
+					case GL.BOOL_VEC3: bools = 3;
+					case GL.FLOAT_VEC4: floats = 4;
+					case GL.INT_VEC4: ints = 4;
+					case GL.UNSIGNED_INT_VEC4: uints = 4;
+					case GL.BOOL_VEC4: bools = 4;
+					case GL.FLOAT_MAT2: floats = 4;
+					case GL.FLOAT_MAT2x3, GL.FLOAT_MAT3x2: floats = 6;
+					case GL.FLOAT_MAT2x4, GL.FLOAT_MAT4x2: floats = 8;
+					case GL.FLOAT_MAT3: floats = 9;
+					case GL.FLOAT_MAT3x4, GL.FLOAT_MAT4x3: floats = 12;
+					case GL.FLOAT_MAT4: floats = 16;
+				}
+
+				var isUninitialized = true;
+
+				if (bools > 0)
+				{
+					var params = Bytes.alloc(bools *= info.size);
+					GL.getUniformiv(__glProgram, loc, params);
+
+					(def = new Array<Bool>()).resize(bools);
+					for (i in 0...bools) isUninitialized = (def[i] = params.get(i) != 0) == false;
+				}
+				else if (ints > 0)
+				{
+					var params = new Int32Array(ints *= info.size);
+					GL.getUniformiv(__glProgram, loc, params);
+
+					(def = new Array<Int>()).resize(ints);
+					for (i in 0...ints) isUninitialized = (def[i] = params[i]) == 0;
+				}
+				else if (uints > 0)
+				{
+					var params = new UInt32Array(uints *= info.size);
+					GL.getUniformuiv(__glProgram, loc, params);
+
+					(def = new Array<Int>()).resize(uints);
+					for (i in 0...uints) isUninitialized = (def[i] = params[i]) == 0;
+				}
+				else if (floats > 0)
+				{
+					var params = new Float32Array(floats *= info.size);
+					GL.getUniformfv(__glProgram, loc, params);
+
+					(def = new Array<Float>()).resize(floats);
+					for (i in 0...floats) isUninitialized = (def[i] = params[i]) == 0.0;
+				}
+
+				if (isUninitialized) def = null;
+				#else
+				def = switch (info.type)
+				{
+					case gl.BOOL, gl.INT, gl.UNSIGNED_INT, gl.FLOAT: [gl.getUniform(__glProgram, loc)];
+					default:
+						#if (js && html5)
+						untyped js.Syntax.code("Array.from({0})", gl.getUniform(__glProgram, loc));
+						#else
+						[for (x in gl.getUniform(__glProgram, loc)) x];
+						#end
+				}
+				#end
+
 				idx = __glslUniformNames.indexOf(name);
 				if (idx == -1)
 				{
-					__glslUniformLocations.push(gl.getUniformLocation(__glProgram, info.name));
-					__glslUniformDefaults.push(null);
+					__glslUniformLocations.push(loc);
+					__glslUniformDefaultAssigns.push(null);
+					__glslUniformDefaults.push(def);
 					__glslUniformNames.push(name);
-					__glslUniformTypes.push(Shader.getParameterTypeFromGLEnum(info.type, info.size > 1));
+					__glslUniformTypes.push(Shader.getParameterTypeFromGLEnum(info.type, isArray));
 					__glslUniformSizes.push(info.size);
 				}
 				else
 				{
-					__glslUniformLocations[idx] = gl.getUniformLocation(__glProgram, info.name);
-					__glslUniformTypes[idx] = Shader.getParameterTypeFromGLEnum(info.type, info.size > 1);
+					__glslUniformLocations[idx] = loc;
+					__glslUniformDefaults[idx] = def;
+					__glslUniformTypes[idx] = Shader.getParameterTypeFromGLEnum(info.type, isArray);
 					__glslUniformSizes[idx] = info.size;
 				}
 			}
@@ -687,7 +781,7 @@ import lime.utils.BytePointer;
 				if (!__glslAttribNames.contains(name))
 				{
 					__glslSamplerLocations.push(null);
-					__glslSamplerDefaults.push(defaultAssign);
+					__glslSamplerDefaultAssigns.push(defaultAssign);
 					__glslSamplerNames.push(name);
 				}
 			}
@@ -696,7 +790,8 @@ import lime.utils.BytePointer;
 				if (!__glslUniformNames.contains(name))
 				{
 					__glslUniformLocations.push(null);
-					__glslUniformDefaults.push(defaultAssign);
+					__glslUniformDefaultAssigns.push(defaultAssign);
+					__glslUniformDefaults.push(null);
 					__glslUniformNames.push(name);
 					__glslUniformTypes.push(Shader.getParameterTypeFromGLSL(typeName, arrayLength != 0));
 					__glslUniformSizes.push(arrayLength == 0 ? 1 : arrayLength);
