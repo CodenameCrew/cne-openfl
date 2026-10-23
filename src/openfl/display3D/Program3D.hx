@@ -6,6 +6,7 @@ import openfl.display3D._internal.GLShader;
 import openfl.display3D._internal.GLUniformLocation;
 import openfl.display3D._internal.AGALConverter;
 import openfl.display._internal.SamplerState;
+import openfl.utils._internal.ArrayBufferView;
 import openfl.utils._internal.Float32Array;
 import openfl.utils._internal.Int32Array;
 import openfl.utils._internal.UInt32Array;
@@ -660,6 +661,8 @@ import lime.utils.BytePointer;
 			}
 			else
 			{
+				var isUninitialized = true;
+
 				#if (lime_opengl || lime_opengles)
 				def = null;
 
@@ -690,8 +693,6 @@ import lime.utils.BytePointer;
 					case GL.FLOAT_MAT3x4, GL.FLOAT_MAT4x3: floats = 12;
 					case GL.FLOAT_MAT4: floats = 16;
 				}
-
-				var isUninitialized = true;
 
 				if (bools > 0)
 				{
@@ -725,20 +726,25 @@ import lime.utils.BytePointer;
 					(def = new Array<Float>()).resize(floats);
 					for (i in 0...floats) isUninitialized = (def[i] = params[i]) == 0.0;
 				}
-
-				if (isUninitialized) def = null;
 				#else
 				def = switch (info.type)
 				{
-					case gl.BOOL, gl.INT, gl.UNSIGNED_INT, gl.FLOAT: [gl.getUniform(__glProgram, loc)];
+					case GL.BOOL, GL.INT, GL.UNSIGNED_INT, GL.FLOAT: [gl.getUniform(__glProgram, loc)];
 					default:
 						#if (js && html5)
 						untyped js.Syntax.code("Array.from({0})", gl.getUniform(__glProgram, loc));
 						#else
-						[for (x in gl.getUniform(__glProgram, loc)) x];
+						var dyn = gl.getUniform(__glProgram, loc);
+						if (Std.isOfType(dyn, Array)) dyn;
+						else if (Std.isOfType(dyn, ArrayBufferView)) [for (i in 0...cast(dyn, ArrayBufferView).length) dyn[i]];
+						else [dyn];
 						#end
 				}
+
+				for (v in def) isUninitialized = v == false || v == 0 ||  v == 0.0;
 				#end
+
+				if (isUninitialized) def = null;
 
 				idx = __glslUniformNames.indexOf(name);
 				if (idx == -1)
