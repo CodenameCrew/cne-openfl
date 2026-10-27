@@ -45,7 +45,6 @@ using StringTools;
 			__height = reader.height;
 			__format = format;
 			__internalFormat = format;
-			__premultiplyAlpha = true;
 
 			{
 				__context.__bindGLTexture2D(__textureID);
