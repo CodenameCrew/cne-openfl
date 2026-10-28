@@ -171,17 +171,6 @@ class ShaderMacro
 				lastMatch = position.pos + position.len;
 			}
 
-			var generateBlock:Array<Expr> = [macro __isGenerated = true];
-
-			generateBlock.push(macro __cacheProgramId = $v{localClass.pack.join(".") + "." + localClass.name});
-			generateBlock.push(macro __glFragmentPragmas = $v{glFragmentPragmas});
-			generateBlock.push(macro __glVertexPragmas = $v{glVertexPragmas});
-			generateBlock.push(macro __glVersionRaw = $v{glVersion});
-			generateBlock.push(macro __glVertexExtensions = $v{glVertexExtensions});
-			generateBlock.push(macro __glFragmentExtensions = $v{glFragmentExtensions});
-			if (glVertexSource != null) generateBlock.push(macro __glVertexSourceRaw = $v{glVertexSource});
-			if (glFragmentSource != null) generateBlock.push(macro __glFragmentSourceRaw = $v{glFragmentSource});
-
 			fields.push({
 				name: "__instanceShaderFields",
 				access: [APrivate, AStatic],
@@ -193,24 +182,24 @@ class ShaderMacro
 				]
 			});
 
-			var newBlock:Array<Expr>;
+			// TODO: juughh ughh dont override if class already have the named static variables
+
+			var newBlock:Array<Expr>, hasGenerateSource:Bool = false;
 			for (field in fields) {
 				switch (field.name) {
 					case "new":
-						newBlock = switch (field.kind) {
+						switch (field.kind) {
 							case FFun(f):
-								if (f.expr == null) null;
+								if (f.expr == null) continue;
 
-								switch (f.expr.expr) {
+								newBlock = switch (f.expr.expr) {
 									case EBlock(e): e;
 									default: null;
 								}
-
-							default: null;
+							default:
 						}
-
-						break;
-					default:
+					case "__generateSource":
+						hasGenerateSource = true;
 				}
 			}
 
@@ -225,7 +214,81 @@ class ShaderMacro
 
 			for (e in paramBlock) newBlock.unshift(e);
 			newBlock.unshift(macro if (__data == null) __data = cast new openfl.display.ShaderData(null));
-			newBlock.unshift(macro if (!__isGenerated) $b{generateBlock});
+
+			fields.push({
+				name: "classProgramId",
+				access: [APublic, AStatic],
+				kind: FVar(macro :Null<String>, macro $v{localClass.pack.join(".") + "." + localClass.name}),
+				pos: pos
+			});
+
+			fields.push({
+				name: "classGLVersion",
+				access: [APublic, AStatic],
+				kind: FVar(macro :Null<String>, macro $v{glVersion}),
+				pos: pos
+			});
+
+			fields.push({
+				name: "classGLFragmentSource",
+				access: [APublic, AStatic],
+				kind: FVar(macro :Null<String>, macro $v{glFragmentSource}),
+				pos: pos
+			});
+
+			fields.push({
+				name: "classGLVertexSource",
+				access: [APublic, AStatic],
+				kind: FVar(macro :Null<String>, macro $v{glVertexSource}),
+				pos: pos
+			});
+
+			fields.push({
+				name: "classGLFragmentExtensions",
+				access: [APublic, AStatic],
+				kind: FVar(macro :Map<String, String>, macro $v{glFragmentExtensions}),
+				pos: pos
+			});
+
+			fields.push({
+				name: "classGLVertexExtensions",
+				access: [APublic, AStatic],
+				kind: FVar(macro :Map<String, String>, macro $v{glVertexExtensions}),
+				pos: pos
+			});
+
+			fields.push({
+				name: "classGLFragmentPragmas",
+				access: [APublic, AStatic],
+				kind: FVar(macro :Map<String, String>, macro $v{glFragmentPragmas}),
+				pos: pos
+			});
+
+			fields.push({
+				name: "classGLVertexPragmas",
+				access: [APublic, AStatic],
+				kind: FVar(macro :Map<String, String>, macro $v{glVertexPragmas}),
+				pos: pos
+			});
+
+			if (!hasGenerateSource) {
+				fields.push({
+					name: "__generateSource",
+					access: [APrivate, AOverride],
+					kind: FFun({args: [], expr: macro {
+						__isGenerated = true;
+						__cacheProgramId = classProgramId;
+						__glVersion = classGLVersion;
+						__glFragmentSourceRaw = classGLFragmentSource;
+						__glVertexSourceRaw = classGLVertexSource;
+						__glFragmentExtensions = classGLFragmentExtensions;
+						__glVertexExtensions = classGLVertexExtensions;
+						__glFragmentPragmas = classGLFragmentPragmas;
+						__glVertexPragmas = classGLVertexPragmas;
+					}}),
+					pos: pos
+				});
+			}
 		}
 
 		return fields;

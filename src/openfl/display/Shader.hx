@@ -377,7 +377,10 @@ class Shader
 		__numPasses = 1;
 		__precisionHint = FULL;
 		__createAssembler();
+		__generateSource();
 	}
+
+	@:noCompletion private function __generateSource():Void {} // Generated in macro
 
 	@:noCompletion private function __createAssembler():Void
 	{
@@ -783,7 +786,7 @@ class Shader
 		inline function register(x:Any)
 		{
 			Reflect.setField(__data, name, x);
-			if (__isGenerated && __instanceShaderHasField(name))
+			if (__instanceShaderHasField(name))
 			{
 				try
 				{
