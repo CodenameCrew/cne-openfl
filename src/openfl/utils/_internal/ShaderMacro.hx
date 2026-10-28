@@ -149,7 +149,7 @@ class ShaderMacro
 			processFields(glVertexSource, "uniform", fieldNames, fields, paramBlock, pos);
 			processFields(glFragmentSource, "uniform", fieldNames, fields, paramBlock, pos);
 
-			var position, pragmaSource, regex = ~/(?:^|\s)#pragma\s+(?|"([^"]+)"|'([^']+)'|([^\s]+))/g, lastMatch = 0;
+			var position, pragmaSource, regex = ~/#pragma\s+(\w+)\b/g, lastMatch = 0;
 			while (regex.matchSub(glVertexSource, lastMatch)) {
 				if ((pragmaSource = glVertexPragmas.get(regex.matched(1))) != null) {
 					processFields(pragmaSource, "attribute", fieldNames, fields, paramBlock, pos);

@@ -52,7 +52,6 @@ else if (openfl_HasColorTransform) {
 	color = clamp(openfl_ColorOffsetv + (color * mult), 0.0, 1.0);
 
 	gl_FragColor = vec4(color.rgb * color.a * openfl_Alphav, color.a * openfl_Alphav);
-	if (color.a == 0.0) discard;
 }
 else {
 	gl_FragColor = color * openfl_Alphav;

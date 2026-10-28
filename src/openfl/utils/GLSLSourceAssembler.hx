@@ -494,7 +494,8 @@ class GLSLSourceAssembler
 		}
 		#end
 
-		if (OpenGLRenderer.__complexBlendsSupported && !isVertex && versionNumber >= 150 && (source == null || !(~/\blayout\s*\(blend_support_\w+\)\s+out\s*;/g).match(source)))
+		if (!isVertex && OpenGLRenderer.__complexBlendsSupported && versionNumber >= 150
+				&& (source == null || !(~/\blayout\s*\(blend_support_\w+\)\s+out\s*;/g).match(source)))
 		{
 			var behavior = extensions.get("GL_KHR_blend_equation_advanced");
 			if (behavior == "enable" || behavior == "require")
@@ -505,18 +506,21 @@ class GLSLSourceAssembler
 
 		if (source != null)
 		{
-			if (!isVertex && (versionNumber >= 130 && versionProfile != "compatibility") && StringTools.contains(source, "openfl_FragColor"))
+			if (versionNumber >= 130 && versionProfile != "compatibility")
 			{
-				if (versionNumber >= 300)
+				if (!isVertex && StringTools.contains(source, "openfl_FragColor"))
 				{
-					if (!(~/\blayout\s*\(location\s*=\s*0\)\s*out\s+vec4\s+openfl_FragColor\s*;/g).match(source))
+					if (versionNumber >= 300)
 					{
-						output.add("layout(location = 0) out vec4 openfl_FragColor;\n\n");
+						if (!(~/\blayout\s*\(location\s*=\s*0\)\s*out\s+vec4\s+openfl_FragColor\s*(?:[^;{}]+)?;/g).match(source))
+						{
+							output.add("layout(location = 0) out vec4 openfl_FragColor;\n\n");
+						}
 					}
-				}
-				else if (!(~/\bout\s+vec4\s+openfl_FragColor\s*;/g).match(source))
-				{
-					output.add("out vec4 openfl_FragColor;\n\n");
+					else if (!(~/\bout\s+vec4\s+openfl_FragColor\s*(?:[^;{}]+)?;/g).match(source))
+					{
+						output.add("out vec4 openfl_FragColor;\n\n");
+					}
 				}
 			}
 
@@ -545,7 +549,7 @@ class GLSLSourceAssembler
 
 			// This is for getting complex blend modes to work with AMD Card quirks.
 			// 'gl_SampleID' : required extension not requested: GL_ARB_sample_shading
-			if (OpenGLRenderer.__complexBlendsSupported && !extensions.exists("GL_ARB_sample_shading") && !extensions.exists("GL_OES_sample_shading"))
+			if (!extensions.exists("GL_ARB_sample_shading") && !extensions.exists("GL_OES_sample_shading"))
 			{
 				if (__isVersionES(versionNumber, versionProfile)) extensions.set("GL_OES_sample_shading", "enable");
 				else extensions.set("GL_ARB_sample_shading", "enable");
