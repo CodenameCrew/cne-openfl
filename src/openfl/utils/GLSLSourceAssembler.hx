@@ -532,14 +532,19 @@ class GLSLSourceAssembler
 
 	private function __buildExtensions(extensions:Map<String, String>, versionNumber:Int, versionProfile:Null<String>, isVertex:Bool):Map<String, String>
 	{
+		var isES = __isVersionES(versionNumber, versionProfile);
+
+		inline function pushExtensionWithVariant(og:String, alt:String, behavior:String)
+		{
+			if (extensions.exists(alt)) extensions.remove(alt);
+			if (!extensions.exists(og)) extensions.set(og, behavior);
+		}
+
 		if (versionNumber >= 300 && versionNumber < 400)
 		{
-			// In 300, 310, 320, 330; it is required to include this extension.
-			if (!extensions.exists("GL_ARB_separate_shader_objects") && !extensions.exists("GL_EXT_separate_shader_objects"))
-			{
-				if (__isVersionES(versionNumber, versionProfile)) extensions.set("GL_EXT_separate_shader_objects", "require");
-				else extensions.set("GL_ARB_separate_shader_objects", "require");
-			}
+			// Is this still needed?
+			if (isES) pushExtensionWithVariant("GL_EXT_separate_shader_objects", "GL_ARB_separate_shader_objects", "enable");
+			else pushExtensionWithVariant("GL_ARB_separate_shader_objects", "GL_EXT_separate_shader_objects", "enable");
 		}
 
 		// Enable complex blend modes if supported.
@@ -549,10 +554,10 @@ class GLSLSourceAssembler
 
 			// This is for getting complex blend modes to work with AMD Card quirks.
 			// 'gl_SampleID' : required extension not requested: GL_ARB_sample_shading
-			if (!extensions.exists("GL_ARB_sample_shading") && !extensions.exists("GL_OES_sample_shading"))
+			if ((~/\b(?:amd\b|ati\b)/gi).match(GL.getParameter(GL.VENDOR)))
 			{
-				if (__isVersionES(versionNumber, versionProfile)) extensions.set("GL_OES_sample_shading", "enable");
-				else extensions.set("GL_ARB_sample_shading", "enable");
+				if (isES) pushExtensionWithVariant("GL_OES_sample_shading", "GL_ARB_sample_shading", "enable");
+				else pushExtensionWithVariant("GL_ARB_sample_shading", "GL_OES_sample_shading", "enable");
 			}
 		}
 
