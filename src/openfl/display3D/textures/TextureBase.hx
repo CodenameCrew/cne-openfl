@@ -118,8 +118,8 @@ class TextureBase extends EventDispatcher
 
 		if (gl != null && width > 0 && height > 0 && (__width != width || __height != height))
 		{
-			__memoryWidth = __width = width;
-			__memoryHeight = __height = height;
+			__width = width;
+			__height = height;
 
 			__context.__bindGLTexture2D(__textureID);
 
