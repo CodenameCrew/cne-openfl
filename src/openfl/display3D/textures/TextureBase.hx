@@ -124,7 +124,7 @@ class TextureBase extends EventDispatcher
 			__context.__bindGLTexture2D(__textureID);
 
 			gl.texImage2D(__textureTarget, 0, __internalFormat, width, height, 0, __format, gl.UNSIGNED_BYTE, null);
-			__updateGLFramebuffer(false, 0, 0);
+			if (__glFramebuffer != null) __updateGLFramebuffer();
 
 			__context.__bindGLTexture2D(null);
 		}
@@ -195,19 +195,17 @@ class TextureBase extends EventDispatcher
 		return __glFramebuffer;
 	}
 
-	@:noCompletion private function __updateGLFramebuffer(enableDepthAndStencil:Bool, antiAlias:Int, surfaceSelector:Int):GLFramebuffer
+	@:noCompletion private function __updateGLFramebuffer():GLFramebuffer
 	{
-		if (__glFramebuffer == null)
-		{
-			return __getGLFramebuffer(false, 0, 0);
-		}
-		else
-		{
-			var gl = __context.gl;
+		if (__glFramebuffer == null) return null;
 
-			gl.bindFramebuffer(gl.FRAMEBUFFER, __glFramebuffer);
-			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, __textureID, 0);
+		var gl = __context.gl;
 
+		__context.__bindGLFramebuffer(__glFramebuffer);
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, __textureID, 0);
+
+		if (__glDepthRenderbuffer != null)
+		{
 			var seperate = __glDepthRenderbuffer != __glStencilRenderbuffer;
 
 			gl.bindRenderbuffer(gl.RENDERBUFFER, __glDepthRenderbuffer);
@@ -220,9 +218,9 @@ class TextureBase extends EventDispatcher
 			}
 
 			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-
-			return __glFramebuffer;
 		}
+
+		return __glFramebuffer;
 	}
 
 	#if lime

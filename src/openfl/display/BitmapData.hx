@@ -1452,10 +1452,9 @@ class BitmapData implements IBitmapDrawable
 		if (height > Graphics.maxTextureHeight) height = Graphics.maxTextureHeight;
 
 		var bitmapData = new BitmapData(0, 0, true, 0);
-		bitmapData.__texture = context.createRectangleTexture(width, height, BGRA, false);
+		bitmapData.__texture = context.createRectangleTexture(width, height, BGRA, true);
 		bitmapData.__textureContext = bitmapData.__texture.__textureContext;
 		bitmapData.__resize(bitmapData.__texture.__width, bitmapData.__texture.__height);
-		bitmapData.__texture.__getGLFramebuffer(true, 0, 0);
 		bitmapData.__isValid = true;
 		bitmapData.__fillRect(bitmapData.rect, fillColor, true);
 		bitmapData.readable = false;
