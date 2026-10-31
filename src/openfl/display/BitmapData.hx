@@ -3189,21 +3189,65 @@ class BitmapData implements IBitmapDrawable
 		{
 			__resize(width, height);
 
-			if (__surface != null) __surface.flush();
-			if (image != null) image.resize(width, height);
+			if (image != null && readable)
+			{
+				image.resize(width, height);
 
-			if (__texture != null)
+				if (__texture != null)
+				{
+					var textureImage = image;
+
+					#if (js && html5)
+					if (#if openfl_power_of_two true || #end (!TextureBase.__supportsBGRA && textureImage.format != RGBA32))
+					{
+						textureImage = textureImage.clone();
+						textureImage.format = RGBA32;
+						// textureImage.buffer.premultiplied = true;
+						#if openfl_power_of_two
+						textureImage.powerOfTwo = true;
+						#end
+					}
+					#else
+					if (#if openfl_power_of_two !textureImage.powerOfTwo || #end (!textureImage.premultiplied && textureImage.transparent))
+					{
+						textureImage = textureImage.clone();
+						textureImage.premultiplied = true;
+						#if openfl_power_of_two
+						textureImage.powerOfTwo = true;
+						#end
+					}
+					#end
+
+					__texture.__uploadFromImage(textureImage);
+					__textureVersion = image.version;
+				}
+			}
+			else if (__texture != null)
 			{
 				__texture.resize(width, height);
-
-				__framebufferContext = __textureContext;
-				__indexBufferContext = __textureContext;
-				__framebuffer = __texture.__glFramebuffer;
-				__stencilBuffer = __texture.__glStencilRenderbuffer;
-				__vertexBuffer = null;
-
-				getVertexBuffer(__texture.__context);
 			}
+
+			if (__vertexBuffer != null)
+			{
+				__vertexBufferWidth = 0;
+				__vertexBufferHeight = 0;
+				__vertexBufferScaleX = 0;
+				__vertexBufferScaleY = 0;
+
+				__vertexBufferData[0] = width;
+				__vertexBufferData[1] = height;
+				__vertexBufferData[3] = 1;
+				__vertexBufferData[4] = 1;
+				__vertexBufferData[VERTEX_BUFFER_STRIDE + 1] = height;
+				__vertexBufferData[VERTEX_BUFFER_STRIDE + 4] = 1;
+				__vertexBufferData[VERTEX_BUFFER_STRIDE * 2] = width;
+				__vertexBufferData[VERTEX_BUFFER_STRIDE * 2 + 3] = 1;
+
+				__vertexBuffer.uploadFromTypedArray(__vertexBufferData);
+			}
+
+			if (__surface != null) __surface.flush();
+			if (image != null) image.resize(width, height);
 		}
 	}
 
