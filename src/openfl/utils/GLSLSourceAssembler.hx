@@ -540,13 +540,6 @@ class GLSLSourceAssembler
 			if (!extensions.exists(og)) extensions.set(og, behavior);
 		}
 
-		if (versionNumber >= 300 && versionNumber < 400)
-		{
-			// Is this still needed?
-			if (isES) pushExtensionWithVariant("GL_EXT_separate_shader_objects", "GL_ARB_separate_shader_objects", "enable");
-			else pushExtensionWithVariant("GL_ARB_separate_shader_objects", "GL_EXT_separate_shader_objects", "enable");
-		}
-
 		// Enable complex blend modes if supported.
 		if (OpenGLRenderer.__complexBlendsSupported && !isVertex && versionNumber >= 150)
 		{
