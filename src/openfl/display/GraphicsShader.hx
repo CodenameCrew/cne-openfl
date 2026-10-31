@@ -45,18 +45,19 @@ uniform sampler2D bitmap;")
 
 	@:glFragmentBody("vec4 color = texture2D(bitmap, openfl_TextureCoordv);
 
-if (color.a == 0.0 || openfl_Alphav == 0.0) discard;
-else if (openfl_HasColorTransform) {
+if (openfl_HasColorTransform && color.a > 0.0) {
 	color.rgb /= color.a;
 
 	color = clamp(color * openfl_ColorMultiplierv + openfl_ColorOffsetv, 0.0, 1.0);
 	color.a *= openfl_Alphav;
 
-	gl_FragColor = vec4(color.rgb * color.a, color.a);
+	color.rgb *= color.a;
 }
 else {
-	gl_FragColor = color * openfl_Alphav;
-}")
+	color *= openfl_Alphav;
+}
+
+gl_FragColor = color;")
 
 	@:glFragmentSource("#pragma header
 void main(void) {
