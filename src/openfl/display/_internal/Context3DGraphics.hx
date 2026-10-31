@@ -1132,9 +1132,6 @@ class Context3DGraphics
 							fill = null;
 							shaderBuffer = null;
 							data.skip(type);
-							context.setCulling(NONE);
-							context.__setGLDepthTest(false);
-							context.setDepthTest(false, ALWAYS);
 
 						case MOVE_TO:
 							var c = data.readMoveTo();
@@ -1147,7 +1144,6 @@ class Context3DGraphics
 
 						case OVERRIDE_DEPTH_TEST:
 							var c = data.readOverrideDepthTest();
-							context.__setGLDepthTest(c.depthTest);
 							context.setDepthTest(c.depthTest, c.compareMode);
 
 						default:
