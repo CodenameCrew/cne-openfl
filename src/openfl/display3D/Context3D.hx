@@ -1320,15 +1320,12 @@ import lime.math.Vector2;
 
 		__bindGLElementArrayBuffer(indexBuffer.__id);
 
-		if (__usingComplexBlend)
+		if (!OpenGLRenderer.__coherentBlendsSupported && __usingComplexBlend)
 		{
-			if (OpenGLRenderer.__coherentBlendsSupported) gl.enable(0x9285); // BLEND_ADVANCED_COHERENT_KHR
-			else gl.blendBarrier();
+			gl.blendBarrier();
 		}
 
 		gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_SHORT, firstIndex * 2);
-
-		if (__usingComplexBlend && OpenGLRenderer.__coherentBlendsSupported) gl.disable(0x9285); // BLEND_ADVANCED_COHERENT_KHR
 	}
 
 	/**
@@ -2195,15 +2192,12 @@ import lime.math.Vector2;
 			__state.program.__flush();
 		}
 
-		if (__usingComplexBlend)
+		if (!OpenGLRenderer.__coherentBlendsSupported && __usingComplexBlend)
 		{
-			if (OpenGLRenderer.__coherentBlendsSupported) gl.enable(0x9285); // BLEND_ADVANCED_COHERENT_KHR
-			else gl.blendBarrier();
+			gl.blendBarrier();
 		}
 
 		gl.drawArrays(gl.TRIANGLES, firstIndex, count);
-
-		if (__usingComplexBlend && OpenGLRenderer.__coherentBlendsSupported) gl.disable(0x9285); // BLEND_ADVANCED_COHERENT_KHR
 	}
 
 	@:noCompletion private function __flushGL():Void

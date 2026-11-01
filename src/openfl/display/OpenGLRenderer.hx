@@ -168,6 +168,11 @@ class OpenGLRenderer extends DisplayObjectRenderer
 		if (__coherentBlendsSupported == null)
 		{
 			__coherentBlendsSupported = exts.contains("KHR_blend_equation_advanced_coherent");
+
+			if (__coherentBlendsSupported)
+			{
+				gl.enable(0x9285); // GL_BLEND_ADVANCED_COHERENT_KHR
+			}
 		}
 		if (__standardDerivativesSupported == null)
 		{
