@@ -358,6 +358,7 @@ class Shader
 	@:noCompletion private var __paramBool:Array<ShaderParameter<Bool>>;
 	@:noCompletion private var __paramFloat:Array<ShaderParameter<Float>>;
 	@:noCompletion private var __paramInt:Array<ShaderParameter<Int>>;
+	@:noCompletion private var __paramIndexByName:Map<String, Int>;
 	@:noCompletion private var __position:ShaderParameter<Float>;
 	@:noCompletion private var __precisionHint:ShaderPrecision;
 	@:noCompletion private var __textureCoord:ShaderParameter<Float>;
@@ -749,6 +750,54 @@ class Shader
 			__registerParameter(name, program.__glslUniformTypes[i], false, program.__glslUniformSizes[i], program.__glslUniformLocations[i],
 				true, def != null ? def : __getParameterDefault(program.__glslUniformDefaultAssigns[i], program.__glslUniformTypes[i], false));
 		}
+
+		if (__paramIndexByName == null)
+		{
+			__paramIndexByName = new Map();
+		}
+		else
+		{
+			__paramIndexByName.clear();
+		}
+
+		var index = 0;
+		for (parameter in __paramBool)
+		{
+			__paramIndexByName.set(parameter.name, index++);
+		}
+		for (parameter in __paramFloat)
+		{
+			__paramIndexByName.set(parameter.name, index++);
+		}
+		for (parameter in __paramInt)
+		{
+			__paramIndexByName.set(parameter.name, index++);
+		}
+	}
+
+	@:noCompletion private function __getParamIndex(name:String):Int
+	{
+		if (__paramIndexByName == null)
+		{
+			__paramIndexByName = new Map();
+
+			var index = 0;
+			for (parameter in __paramBool)
+			{
+				__paramIndexByName.set(parameter.name, index++);
+			}
+			for (parameter in __paramFloat)
+			{
+				__paramIndexByName.set(parameter.name, index++);
+			}
+			for (parameter in __paramInt)
+			{
+				__paramIndexByName.set(parameter.name, index++);
+			}
+		}
+
+		var index = __paramIndexByName.get(name);
+		return index == null ? -1 : index;
 	}
 
 	@:noCompletion private function __registerParameter(name:String, type:ShaderParameterType, isSampler:Bool,
@@ -1108,17 +1157,31 @@ class Shader
 		var overrideFloatValue:Array<Float> = null;
 		var overrideIntValue:Array<Int> = null;
 
+		final hasUnresolvedOverrides = shaderBuffer.overrideHasUnresolved;
+
 		for (i in 0...shaderBuffer.paramCount) {
 			hasOverride = false;
 
 			if (i < boolCount) {
 				boolRef = shaderBuffer.paramRefs_Bool[boolIndex];
 
-				for (j in 0...shaderBuffer.overrideBoolCount) {
-					if (boolRef.name == shaderBuffer.overrideBoolNames[j]) {
-						overrideBoolValue = shaderBuffer.overrideBoolValues[j];
+				if (hasUnresolvedOverrides)
+				{
+					for (j in 0...shaderBuffer.overrideBoolCount) {
+						if (boolRef.name == shaderBuffer.overrideBoolNames[j]) {
+							overrideBoolValue = shaderBuffer.overrideBoolValues[j];
+							hasOverride = true;
+							break;
+						}
+					}
+				}
+				else
+				{
+					final slot = shaderBuffer.overrideBoolMap[i];
+					if (slot >= 0)
+					{
+						overrideBoolValue = shaderBuffer.overrideBoolValues[slot];
 						hasOverride = true;
-						break;
 					}
 				}
 
@@ -1135,11 +1198,23 @@ class Shader
 			} else if (i < boolCount + floatCount) {
 				floatRef = shaderBuffer.paramRefs_Float[floatIndex];
 
-				for (j in 0...shaderBuffer.overrideFloatCount) {
-					if (floatRef.name == shaderBuffer.overrideFloatNames[j]) {
-						overrideFloatValue = shaderBuffer.overrideFloatValues[j];
+				if (hasUnresolvedOverrides)
+				{
+					for (j in 0...shaderBuffer.overrideFloatCount) {
+						if (floatRef.name == shaderBuffer.overrideFloatNames[j]) {
+							overrideFloatValue = shaderBuffer.overrideFloatValues[j];
+							hasOverride = true;
+							break;
+						}
+					}
+				}
+				else
+				{
+					final slot = shaderBuffer.overrideFloatMap[i];
+					if (slot >= 0)
+					{
+						overrideFloatValue = shaderBuffer.overrideFloatValues[slot];
 						hasOverride = true;
-						break;
 					}
 				}
 
@@ -1156,11 +1231,23 @@ class Shader
 			} else {
 				intRef = shaderBuffer.paramRefs_Int[intIndex];
 
-				for (j in 0...shaderBuffer.overrideIntCount) {
-					if (intRef.name == shaderBuffer.overrideIntNames[j]) {
-						overrideIntValue = cast shaderBuffer.overrideIntValues[j];
+				if (hasUnresolvedOverrides)
+				{
+					for (j in 0...shaderBuffer.overrideIntCount) {
+						if (intRef.name == shaderBuffer.overrideIntNames[j]) {
+							overrideIntValue = cast shaderBuffer.overrideIntValues[j];
+							hasOverride = true;
+							break;
+						}
+					}
+				}
+				else
+				{
+					final slot = shaderBuffer.overrideIntMap[i];
+					if (slot >= 0)
+					{
+						overrideIntValue = cast shaderBuffer.overrideIntValues[slot];
 						hasOverride = true;
-						break;
 					}
 				}
 
