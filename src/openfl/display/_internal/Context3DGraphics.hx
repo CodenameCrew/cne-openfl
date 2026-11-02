@@ -745,7 +745,7 @@ class Context3DGraphics
 				var vertexBufferPosition = 0;
 				var vertexBufferPositionUVT = 0;
 
-				var uMatrix = renderer.__getMatrix(graphics.__owner.__renderTransform, NEVER).copy();
+				var uMatrix = renderer.__getGraphicsMatrix(graphics.__owner.__renderTransform);
 
 				inline function renderDrawTriangles(verticesLength:Int, indicesLength:Int, uvDataLength:Int, culling:TriangleCulling):Void
 				{

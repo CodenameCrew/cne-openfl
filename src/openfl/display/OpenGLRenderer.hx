@@ -107,6 +107,7 @@ class OpenGLRenderer extends DisplayObjectRenderer
 	@:noCompletion private var __updatedStencil:Bool;
 	@:noCompletion private var __upscaled:Bool;
 	@:noCompletion private var __values:Array<Float>;
+	@:noCompletion private var __graphicsMatrix:Array<Float>;
 	@:noCompletion private var __width:Int;
 
 	@:noCompletion private function new(context:Context3D, defaultRenderTarget:BitmapData = null)
@@ -540,6 +541,23 @@ class OpenGLRenderer extends DisplayObjectRenderer
 		__currentGraphicsShader = other.__currentGraphicsShader;
 
 		// __gl.glProgram = other.__gl.glProgram;
+	}
+
+	@:noCompletion private function __getGraphicsMatrix(transform:Matrix):Array<Float>
+	{
+		var source = __getMatrix(transform, NEVER);
+		var target = __graphicsMatrix;
+		if (target == null || target.length != source.length)
+		{
+			target = [];
+			target.resize(source.length);
+			__graphicsMatrix = target;
+		}
+		for (i in 0...source.length)
+		{
+			target[i] = source[i];
+		}
+		return target;
 	}
 
 	@:noCompletion private function __getMatrix(transform:Matrix, pixelSnapping:PixelSnapping):Array<Float>
