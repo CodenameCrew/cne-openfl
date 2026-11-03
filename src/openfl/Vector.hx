@@ -984,7 +984,11 @@ abstract Vector<T>(IVector<T>)
 		if (!fixed)
 		{
 			#if cpp
-			cpp.NativeArray.setSize(__array, value);
+			if (value != __array.length)
+			{
+				if (value > __array.length) cpp.NativeArray.setSize(__array, value);
+				else __array.resize(value);
+			}
 			#else
 			var currentLength = __array.length;
 			if (value < 0) value = 0;
@@ -1232,13 +1236,10 @@ abstract Vector<T>(IVector<T>)
 		if (value != __array.length && !fixed)
 		{
 			#if cpp
-			if (value > __array.length)
+			if (value != __array.length)
 			{
-				cpp.NativeArray.setSize(__array, value);
-			}
-			else
-			{
-				__array.splice(value, __array.length);
+				if (value > __array.length) cpp.NativeArray.setSize(__array, value);
+				else __array.resize(value);
 			}
 			#else
 			var currentLength = __array.length;
@@ -1484,7 +1485,11 @@ abstract Vector<T>(IVector<T>)
 		if (!fixed)
 		{
 			#if cpp
-			cpp.NativeArray.setSize(__array, value);
+			if (value != __array.length)
+			{
+				if (value > __array.length) cpp.NativeArray.setSize(__array, value);
+				else __array.resize(value);
+			}
 			#else
 			var currentLength = __array.length;
 			if (value < 0) value = 0;
@@ -1722,7 +1727,11 @@ abstract Vector<T>(IVector<T>)
 		if (!fixed)
 		{
 			#if cpp
-			cpp.NativeArray.setSize(__array, value);
+			if (value != __array.length)
+			{
+				if (value > __array.length) cpp.NativeArray.setSize(__array, value);
+				else __array.resize(value);
+			}
 			#else
 			var currentLength = __array.length;
 			if (value < 0) value = 0;
@@ -1971,7 +1980,11 @@ abstract Vector<T>(IVector<T>)
 		if (!fixed)
 		{
 			#if cpp
-			cpp.NativeArray.setSize(__array, value);
+			if (value != __array.length)
+			{
+				if (value > __array.length) cpp.NativeArray.setSize(__array, value);
+				else __array.resize(value);
+			}
 			#else
 			var currentLength = __array.length;
 			if (value < 0) value = 0;
