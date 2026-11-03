@@ -128,12 +128,13 @@ class Assets
 
 		@param	id		The ID or asset path for the bitmap
 		@param	useCache		(Optional) Whether to allow use of the asset cache (Default: true)
-		@param  allowCompressedTextures		(Optional) Wether to allow compressed textures to be used to get this bitmap (Default: true)
+		@param  allowHardwareTextures		(Optional) Whether to immediately push to GPU after getting this bitmap (Default: true)
+		@param  allowCompressedTextures		(Optional) Whether to allow compressed textures to be used to get this bitmap (Default: true)
 		@return		A new BitmapData object
 
 		@see [Working with bitmap assets](https://books.openfl.org/openfl-developers-guide/working-with-bitmaps/working-with-bitmap-assets.html)
 	**/
-	public static function getBitmapData(id:String, useCache:Bool = true, ?allowCompressedTextures:Null<Bool>, ?allowHardwareTextures:Null<Bool>):BitmapData
+	public static function getBitmapData(id:String, useCache:Bool = true, ?allowHardwareTextures:Null<Bool>, ?allowCompressedTextures:Null<Bool>):BitmapData
 	{
 		if (allowCompressedTextures == null) allowCompressedTextures = Assets.allowCompressedTextures;
 		if (allowHardwareTextures == null) allowHardwareTextures = Assets.allowHardwareTextures;
@@ -569,11 +570,13 @@ class Assets
 
 		@param	id 		The ID or asset path for the asset
 		@param	useCache		(Optional) Whether to allow use of the asset cache (Default: true)
+		@param  allowHardwareTextures		(Optional) Whether to immediately push to GPU after getting this bitmap (Default: true)
+		@param  allowCompressedTextures		(Optional) Whether to allow compressed textures to be used to get this bitmap (Default: true)
 		@return		Returns a Future<BitmapData>
 
 		@see [Working with bitmap assets](https://books.openfl.org/openfl-developers-guide/working-with-bitmaps/working-with-bitmap-assets.html)
 	**/
-	public static function loadBitmapData(id:String, useCache:Null<Bool> = true, ?allowCompressedTextures:Null<Bool>, ?allowHardwareTextures:Null<Bool>):Future<BitmapData>
+	public static function loadBitmapData(id:String, useCache:Null<Bool> = true, ?allowHardwareTextures:Null<Bool>, ?allowCompressedTextures:Null<Bool>):Future<BitmapData>
 	{
 		if (allowCompressedTextures == null) allowCompressedTextures = Assets.allowCompressedTextures;
 		if (allowHardwareTextures == null) allowHardwareTextures = Assets.allowHardwareTextures;
