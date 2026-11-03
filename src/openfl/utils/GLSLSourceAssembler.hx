@@ -600,20 +600,7 @@ class GLSLSourceAssembler
 		}
 		#end
 
-		if (!OpenGLRenderer.__separateShadersSupported)
-		{
-			if (isES ? (dataVersion.versionNumber == 300 && contextVersion.versionNumber >= 310)
-					: (dataVersion.versionNumber >= 330 && dataVersion.versionNumber < 410 && contextVersion.versionNumber >= 410))
-			{
-				dataVersion.versionNumber = 410;
-			}
-			// this is horrible
-			else if (isES)
-				dataVersion.versionNumber = 100;
-			else
-				dataVersion.versionNumber = 150;
-		}
-		else if (dataVersion.versionNumber > contextVersion.versionNumber)
+		if (dataVersion.versionNumber > contextVersion.versionNumber)
 			dataVersion.versionNumber = contextVersion.versionNumber;
 
 		if (isES)
