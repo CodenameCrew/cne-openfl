@@ -30,6 +30,10 @@ class ShaderBuffer
 	public var overrideIntCount:Int;
 	public var overrideIntNames:Array<String>;
 	@SuppressWarnings("checkstyle:Dynamic") public var overrideIntValues:Array<Array<Dynamic>>;
+	public var overrideBoolMap:Array<Int>;
+	public var overrideFloatMap:Array<Int>;
+	public var overrideIntMap:Array<Int>;
+	public var overrideHasUnresolved:Bool;
 	// public var overrideNames:Array<String>;
 	// public var overrideValues:Array<Array<Dynamic>>;
 	public var paramBoolCount:Int;
@@ -62,6 +66,9 @@ class ShaderBuffer
 		overrideFloatValues = [];
 		overrideBoolNames = [];
 		overrideBoolValues = [];
+		overrideBoolMap = [];
+		overrideFloatMap = [];
+		overrideIntMap = [];
 		paramLengths = [];
 		paramPositions = [];
 		paramRefs_Bool = [];
@@ -70,8 +77,32 @@ class ShaderBuffer
 		paramTypes = [];
 	}
 
+	private inline function resolveParamIndex(name:String, count:Int):Int
+	{
+		if (shader == null) return -1;
+
+		final index = shader.__getParamIndex(name);
+		return (index >= 0 && index < count) ? index : -1;
+	}
+
+	private inline function addOverrideSlot(map:Array<Int>, index:Int, slot:Int):Void
+	{
+		if (index < 0 || index >= map.length)
+		{
+			overrideHasUnresolved = true;
+			return;
+		}
+
+		if (map[index] == -1)
+		{
+			map[index] = slot;
+		}
+	}
+
 	public function addBoolOverride(name:String, values:Array<Bool>):Void
 	{
+		addOverrideSlot(overrideBoolMap, resolveParamIndex(name, paramCount), overrideBoolCount);
+
 		overrideBoolNames[overrideBoolCount] = name;
 		overrideBoolValues[overrideBoolCount] = values;
 		overrideBoolCount++;
@@ -79,6 +110,8 @@ class ShaderBuffer
 
 	public function addFloatOverride(name:String, values:Array<Float>):Void
 	{
+		addOverrideSlot(overrideFloatMap, resolveParamIndex(name, paramCount), overrideFloatCount);
+
 		overrideFloatNames[overrideFloatCount] = name;
 		overrideFloatValues[overrideFloatCount] = values;
 		overrideFloatCount++;
@@ -86,6 +119,8 @@ class ShaderBuffer
 
 	public function addIntOverride(name:String, values:Array<Int>):Void
 	{
+		addOverrideSlot(overrideIntMap, resolveParamIndex(name, paramCount), overrideIntCount);
+
 		overrideIntNames[overrideIntCount] = name;
 		overrideIntValues[overrideIntCount] = values;
 		overrideIntCount++;
@@ -97,6 +132,14 @@ class ShaderBuffer
 		overrideIntCount = 0;
 		overrideFloatCount = 0;
 		overrideBoolCount = 0;
+		overrideHasUnresolved = false;
+
+		for (i in 0...overrideBoolMap.length)
+		{
+			overrideBoolMap[i] = -1;
+			overrideFloatMap[i] = -1;
+			overrideIntMap[i] = -1;
+		}
 	}
 
 	public function update(shader:GraphicsShader):Void
@@ -138,6 +181,22 @@ class ShaderBuffer
 		paramBoolCount = boolCount;
 		paramFloatCount = floatCount;
 		paramIntCount = intCount;
+
+		overrideHasUnresolved = false;
+
+		if (overrideBoolMap.length != paramCount)
+		{
+			overrideBoolMap.resize(paramCount);
+			overrideFloatMap.resize(paramCount);
+			overrideIntMap.resize(paramCount);
+		}
+
+		for (i in 0...paramCount)
+		{
+			overrideBoolMap[i] = -1;
+			overrideFloatMap[i] = -1;
+			overrideIntMap[i] = -1;
+		}
 
 		var length = 0, p = 0;
 		var param:ShaderParameter<Bool>;

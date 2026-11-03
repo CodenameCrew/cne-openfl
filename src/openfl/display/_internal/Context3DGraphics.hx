@@ -745,6 +745,8 @@ class Context3DGraphics
 				var vertexBufferPosition = 0;
 				var vertexBufferPositionUVT = 0;
 
+				var uMatrix = renderer.__getGraphicsMatrix(graphics.__owner.__renderTransform);
+
 				inline function renderDrawTriangles(verticesLength:Int, indicesLength:Int, uvDataLength:Int, culling:TriangleCulling):Void
 				{
 					if (bitmap != null && uvDataLength == 0)
@@ -765,7 +767,6 @@ class Context3DGraphics
 						var vertexBuffer = hasUVTData ? graphics.__vertexBufferUVT : graphics.__vertexBuffer;
 						var bufferPosition = hasUVTData ? vertexBufferPositionUVT : vertexBufferPosition;
 
-						var uMatrix = renderer.__getMatrix(graphics.__owner.__renderTransform, NEVER);
 						var shader:Shader;
 
 						if (shaderBuffer != null && !maskRender)
@@ -931,7 +932,6 @@ class Context3DGraphics
 								else if (c.rects != null) length = c.rects.length >> 2;
 								else length = 0;
 
-								var uMatrix = renderer.__getMatrix(graphics.__owner.__renderTransform, NEVER);
 								var shader:Shader;
 
 								if (shaderBuffer != null && !maskRender)
