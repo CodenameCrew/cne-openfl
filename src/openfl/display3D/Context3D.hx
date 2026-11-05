@@ -2378,6 +2378,21 @@ import lime.math.Vector2;
 		var shader = __state.shader;
 		var program = __state.program;
 
+		if (#if openfl_disable_context_cache true #else __contextState.program != program #end)
+		{
+			if (__contextState.program != null)
+			{
+				__contextState.program.__disable();
+			}
+
+			if (program != null)
+			{
+				program.__enable();
+			}
+
+			__contextState.program = program;
+		}
+
 		if (#if openfl_disable_context_cache true #else __contextState.shader != shader #end)
 		{
 			// TODO: Merge this logic
@@ -2393,21 +2408,6 @@ import lime.math.Vector2;
 			}
 
 			__contextState.shader = shader;
-		}
-
-		if (#if openfl_disable_context_cache true #else __contextState.program != program #end)
-		{
-			if (__contextState.program != null)
-			{
-				__contextState.program.__disable();
-			}
-
-			if (program != null)
-			{
-				program.__enable();
-			}
-
-			__contextState.program = program;
 		}
 
 		if (program != null && program.__format == AGAL)

@@ -3,6 +3,7 @@ package openfl.display;
 import openfl.display3D.Context3DWrapMode;
 import openfl.display3D.Context3DMipFilter;
 import openfl.display3D.Context3DTextureFilter;
+import openfl.display3D.Context3DProgramFormat;
 import openfl.display3D._internal.GLProgram;
 import openfl.display3D._internal.GLShader;
 import openfl.display._internal.ShaderBuffer;
@@ -330,6 +331,38 @@ class Shader
 	**/
 	public var program:Program3D;
 
+	/**
+		When enabled (default) and the shader source declares the flixel/openfl
+		color-transform flag uniforms (`openfl_HasColorTransform`, `hasTransform`,
+		`hasColorTransform`), an additional constant-folded "filter variant"
+		program is compiled where those flags are `const false`.
+
+		The variant is bound automatically by the renderer when the shader is
+		used outside of flixel's tile batching (camera `ShaderFilter` passes,
+		`BitmapData.draw`, display-object rendering), where those flags are
+		always false and their per-draw uniform/attribute submission is pure
+		overhead. Additionally `apply_flixel_transform` becomes a no-op and
+		`flixel_texture2D` degrades to a plain `texture2D` (the transform is
+		an identity there), removing the per-sample un-premultiply → clamp →
+		premultiply roundtrip. Flixel's tile rendering keeps using the full
+		program, so sprite `color`/`alpha`/`colorOffset` behavior is unchanged.
+
+		Set to `false` to force the shader to always use its full program.
+	**/
+	public var filterVariantEnabled:Bool = true;
+
+	/**
+	 * Whether the constant-folded filter variant program was actually compiled
+	 * for this shader (it only exists when the sources declare the foldable
+	 * flags and compiled successfully). Read-only.
+	**/
+	public var filterVariantActive(get, never):Bool;
+
+	@:noCompletion private inline function get_filterVariantActive():Bool
+	{
+		return __filterProgram != null;
+	}
+
 	@:noCompletion private var __alpha:ShaderParameter<Float>;
 	@:noCompletion private var __bitmap:ShaderInput<BitmapData>;
 	@:noCompletion private var __cacheProgramId:String;
@@ -350,6 +383,8 @@ class Shader
 	@:noCompletion private var __glSourceDirty:Bool;
 	@:noCompletion private var __glVertexSourceRaw:String;
 	@:noCompletion private var __glVertexSource:String;
+	@:noCompletion private var __filterProgram:Program3D;
+	@:noCompletion private var __filterMode:Bool;
 	@:noCompletion private var __hasColorTransform:ShaderParameter<Bool>;
 	@:noCompletion private var __inputBitmapData:Array<ShaderInput<BitmapData>>;
 	@:noCompletion private var __isGenerated:Bool;
@@ -377,6 +412,7 @@ class Shader
 		__glSourceDirty = true;
 		__numPasses = 1;
 		__precisionHint = FULL;
+		__filterMode = false;
 		__createAssembler();
 		__generateSource();
 	}
@@ -522,6 +558,8 @@ class Shader
 		{
 			program = null;
 			glProgram = null;
+			__filterProgram = null;
+			__filterMode = false;
 
 			__resetParams();
 
@@ -598,6 +636,11 @@ class Shader
 			}
 			__buildParamData();
 		}
+
+		if (__context != null && program != null)
+		{
+			__initFilterProgram();
+		}
 	}
 
 	@:noCompletion private function __initProgram(id:String):Void
@@ -623,6 +666,179 @@ class Shader
 		}
 
 		glProgram = program.__glProgram;
+	}
+
+	@:noCompletion private function __initFilterProgram():Void
+	{
+		if (__filterProgram != null || !filterVariantEnabled) return;
+		if (__context == null || program == null || program.__format != GLSL) return;
+		if (__glVertexSource == null || __glFragmentSource == null) return;
+
+		if (!__flixelFlagRegex.match(__glVertexSource) && !__flixelFlagRegex.match(__glFragmentSource)) return;
+
+		final foldedVertex = __foldFlagUniforms(__glVertexSource);
+		var foldedFragment = __foldFlagUniforms(__glFragmentSource);
+
+		if (foldedVertex == __glVertexSource && foldedFragment == __glFragmentSource) return;
+
+		final sampleCall = ~/\btexture2D\s*\(/.match(foldedFragment) ? "texture2D" : "texture";
+		foldedFragment = __neutralizeGLFunction(foldedFragment, "void apply_flixel_transform(inout vec4 color)", "{}");
+		foldedFragment = __neutralizeGLFunction(foldedFragment, "vec4 flixel_texture2D(sampler2D bitmap, vec2 coord)",
+			'{ return $sampleCall(bitmap, coord); }');
+
+		final id = (__cacheProgramId ?? (foldedVertex + foldedFragment)) + "|filterVariant" + (__precisionHint == FAST ? "FAST" : "");
+
+		var filterProgram = __context.__programs.get(id);
+
+		if (filterProgram == null)
+		{
+			filterProgram = __context.createProgram(GLSL);
+
+			if (openfl.Lib.current.stage != null && openfl.Lib.current.stage.__uncaughtErrorEvents.__enabled)
+			{
+				try
+				{
+					filterProgram.uploadSources(foldedVertex, foldedFragment);
+					__context.__programs.set(id, filterProgram);
+				}
+				catch (e:Dynamic)
+				{
+					openfl.Lib.current.stage.__handleError(e);
+					filterProgram = null;
+				}
+			}
+			else
+			{
+				filterProgram.uploadSources(foldedVertex, foldedFragment);
+				__context.__programs.set(id, filterProgram);
+			}
+		}
+
+		#if lime
+		if (filterProgram != null
+			&& (filterProgram.__glProgram == null
+				|| __context.gl.getProgramParameter(filterProgram.__glProgram, __context.gl.LINK_STATUS) == 0))
+		{
+			Log.verbose('[Shader] Filter variant program failed to compile, using full program');
+			__context.__programs.remove(id);
+			filterVariantEnabled = false;
+			filterProgram = null;
+		}
+		#end
+
+		if (filterProgram == null) return;
+		__filterProgram = filterProgram;
+
+		for (input in __inputBitmapData)
+		{
+			input.__filterIndex = __getFilterSamplerIndex(input.name, filterProgram);
+		}
+
+		for (parameter in __paramBool)
+		{
+			parameter.__filterIndex = parameter.__isUniform ? filterProgram.getConstantIndex(parameter.name) : filterProgram.getAttributeIndex(parameter.name);
+		}
+
+		for (parameter in __paramFloat)
+		{
+			parameter.__filterIndex = parameter.__isUniform ? filterProgram.getConstantIndex(parameter.name) : filterProgram.getAttributeIndex(parameter.name);
+		}
+
+		for (parameter in __paramInt)
+		{
+			parameter.__filterIndex = parameter.__isUniform ? filterProgram.getConstantIndex(parameter.name) : filterProgram.getAttributeIndex(parameter.name);
+		}
+	}
+
+	@:noCompletion private static function __foldFlagUniforms(source:String):String
+	{
+		return __flagUniformRegex.replace(source, "const bool $2 = false;");
+	}
+
+	private static final __flagUniformRegex:EReg = ~/\buniform\s+((?:lowp\s+|mediump\s+|highp\s+)?bool\s+)(openfl_HasColorTransform|hasTransform|hasColorTransform)(\s*;)/g;
+
+	private static final __flixelFlagRegex:EReg = ~/\buniform\s+(?:(?:lowp\s+|mediump\s+|highp\s+)?bool\s+)hasTransform\s*;/;
+
+	@:noCompletion private static function __neutralizeGLFunction(source:String, signature:String, body:String):String
+	{
+		var searchFrom:Int = 0;
+
+		while (true)
+		{
+			final start = source.indexOf(signature, searchFrom);
+			if (start == -1) break;
+
+			final open = source.indexOf("{", start + signature.length);
+			if (open == -1) break;
+
+			var depth = 0, i = open, end = -1;
+			while (i < source.length)
+			{
+				final c = source.charCodeAt(i);
+				if (c == '{'.code) depth++;
+				else if (c == '}'.code)
+				{
+					depth--;
+					if (depth == 0)
+					{
+						end = i;
+						break;
+					}
+				}
+				i++;
+			}
+
+			if (end == -1) break;
+
+			source = source.substring(0, open) + body + source.substring(end + 1);
+			searchFrom = open + body.length;
+		}
+
+		return source;
+	}
+
+	@:noCompletion private inline function __getFilterSamplerIndex(name:String, filterProgram:Program3D):Int
+	{
+		final index = filterProgram.__glslSamplerNames.indexOf(name);
+		if (index == -1) return -1;
+		final location = filterProgram.__glslSamplerLocations[index];
+		return location == null ? -1 : location;
+	}
+
+	@:noCompletion private function __setFilterMode(filter:Bool):Bool
+	{
+		if (__filterMode == filter || __filterProgram == null) return false;
+		__filterMode = filter;
+
+		for (input in __inputBitmapData)
+		{
+			final swap = input.index;
+			input.index = input.__filterIndex;
+			input.__filterIndex = swap;
+		}
+
+		for (parameter in __paramBool)
+		{
+			final swap = parameter.index;
+			parameter.index = parameter.__filterIndex;
+			parameter.__filterIndex = swap;
+		}
+
+		for (parameter in __paramFloat)
+		{
+			final swap = parameter.index;
+			parameter.index = parameter.__filterIndex;
+			parameter.__filterIndex = swap;
+		}
+
+		for (parameter in __paramInt)
+		{
+			final swap = parameter.index;
+			parameter.index = parameter.__filterIndex;
+			parameter.__filterIndex = swap;
+		}
+
+		return true;
 	}
 
 	@:noCompletion private function __refreshGLSource():Void

@@ -417,6 +417,7 @@ class OpenGLRenderer extends DisplayObjectRenderer
 		{
 			__currentShader = shader;
 			__initShader(shader);
+			shader.__setFilterMode(false);
 			__context3D.setProgram(shader.program);
 			__context3D.__flushGLProgram();
 			// __context3D.__flushGLTextures ();
@@ -444,7 +445,19 @@ class OpenGLRenderer extends DisplayObjectRenderer
 		{
 			if (__currentShader.__position != null) __currentShader.__position.__useArray = true;
 			if (__currentShader.__textureCoord != null) __currentShader.__textureCoord.__useArray = true;
-			__context3D.setProgram(__currentShader.program);
+
+			if (__currentShader.__filterProgram != null && __currentShader.filterVariantEnabled)
+			{
+				__currentShader.__setFilterMode(true);
+				__context3D.setProgram(__currentShader.__filterProgram);
+				__context3D.__state.shader = __currentShader;
+			}
+			else
+			{
+				__currentShader.__setFilterMode(false);
+				__context3D.setProgram(__currentShader.program);
+			}
+
 			__context3D.__flushGLProgram();
 			__context3D.__flushGLTextures();
 			__currentShader.__update();
@@ -1232,6 +1245,17 @@ class OpenGLRenderer extends DisplayObjectRenderer
 	{
 		if (__currentShader != null && __currentShaderBuffer != null)
 		{
+			if (__currentShader.__filterProgram != null)
+			{
+				__currentShader.__setFilterMode(false);
+
+				if (__context3D.__contextState.program != __currentShader.program)
+				{
+					__context3D.setProgram(__currentShader.program);
+					__context3D.__flushGLProgram();
+				}
+			}
+
 			__currentShader.__updateFromBuffer(__currentShaderBuffer, bufferOffset);
 		}
 	}

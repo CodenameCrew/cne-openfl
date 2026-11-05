@@ -150,6 +150,7 @@ import openfl.display3D.Context3D;
 	public var value:Array<T>;
 
 	@:noCompletion private var __arrayLength:Int;
+	@:noCompletion private var __filterIndex:Dynamic;
 	@:noCompletion private var __internal:Bool;
 	@:noCompletion private var __isBool:Bool;
 	@:noCompletion private var __isFloat:Bool;
@@ -162,6 +163,7 @@ import openfl.display3D.Context3D;
 	public function new()
 	{
 		index = -1;
+		__filterIndex = -1;
 	}
 
 	@:noCompletion private function __disableGL(context:Context3D):Void
