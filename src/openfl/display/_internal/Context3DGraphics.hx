@@ -32,6 +32,8 @@ class Context3DGraphics
 {
 	public static var blankBitmapData:BitmapData = new BitmapData(1, 1, false, 0);
 
+	private static var __fillShader:Context3DFillShader;
+
 	private static var maskRender:Bool;
 	private static var tempColorTransform = new ColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
 	private static var tempVerticesVector:Vector<Float> = new Vector<Float>();
@@ -40,6 +42,12 @@ class Context3DGraphics
 	private static var tempScale9VerticesVector:Vector<Float>;
 	private static var renderOrHitTestReader:DrawCommandReader = new DrawCommandReader(null);
 	private static var buildBufferReader:DrawCommandReader = new DrawCommandReader(null);
+
+	private static function getFillShader():Context3DFillShader
+	{
+		if (__fillShader == null) __fillShader = new Context3DFillShader();
+		return __fillShader;
+	}
 
 	private static function buildBuffer(graphics:Graphics, renderer:OpenGLRenderer):Void
 	{
@@ -792,7 +800,7 @@ class Context3DGraphics
 						}
 						else
 						{
-							shader = maskRender ? renderer.__maskShader : renderer.__initGraphicsShader(null);
+							shader = maskRender ? renderer.__maskShader : getFillShader();
 							renderer.setShader(shader);
 							renderer.applyMatrix(uMatrix);
 							renderer.applyBitmapData(blankBitmapData, false, repeat);
@@ -957,7 +965,7 @@ class Context3DGraphics
 								}
 								else
 								{
-									shader = maskRender ? renderer.__maskShader : renderer.__initGraphicsShader(null);
+									shader = maskRender ? renderer.__maskShader : getFillShader();
 									renderer.setShader(shader);
 									renderer.applyMatrix(uMatrix);
 									renderer.applyBitmapData(blankBitmapData, false, false);
@@ -1079,7 +1087,7 @@ class Context3DGraphics
 								matrix.ty = y;
 								matrix.concat(graphics.__owner.__renderTransform);
 
-								var shader = maskRender ? renderer.__maskShader : renderer.__initGraphicsShader(null);
+								var shader = maskRender ? renderer.__maskShader : getFillShader();
 								renderer.setShader(shader);
 								renderer.applyMatrix(renderer.__getMatrix(matrix, AUTO));
 								renderer.applyBitmapData(blankBitmapData, false, false);

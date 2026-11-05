@@ -126,6 +126,7 @@ import openfl.display3D.Context3D;
 	public var wrap:Context3DWrapMode;
 
 	@:noCompletion private var __isUniform:Bool;
+	@:noCompletion private var __filterIndex:Dynamic;
 
 	/**
 		Creates a ShaderInput instance. Developer code does not call the
@@ -138,6 +139,7 @@ import openfl.display3D.Context3D;
 		filter = NEAREST;
 		height = 0;
 		index = -1;
+		__filterIndex = -1;
 		mipFilter = MIPNONE;
 		width = 0;
 		wrap = CLAMP;
